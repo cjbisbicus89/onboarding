@@ -6,7 +6,6 @@ import {
   Image,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   Dimensions,
   SafeAreaView,
 } from 'react-native';
@@ -18,13 +17,24 @@ import { RootStackParamList } from '../../types/navigation.types';
 import { Trash2, Plus, Minus, CreditCard, ArrowLeft } from 'lucide-react-native';
 import { Backdrop } from '../../components/ui/backdrop.component';
 import { CardFormComponent } from './components/card-form.component';
+import { CustomerFormComponent } from './components/customer-form.component';
 import { PaymentSummaryComponent } from './components/payment-summary.component';
+import { setCustomerData } from '../../application/state/slices/customerSlice';
 import { checkoutClient } from '../../services/api/checkout-client.service';
 import { v4 as uuidv4 } from 'uuid';
+import { Toast, useToast } from '../../components/shared/toast.component';
 
 const { width, height } = Dimensions.get('window');
 
 type CheckoutScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Checkout'>;
+
+interface PaymentMethodData {
+  cardNumber: string;
+  expMonth: string;
+  expYear: string;
+  cvc: string;
+  holderName: string;
+}
 
 interface Props {
   navigation: CheckoutScreenNavigationProp;
@@ -36,9 +46,11 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
   const customer = useAppSelector((state) => state.customer);
 
   const [showCardBackdrop, setShowCardBackdrop] = useState(false);
+  const [showCustomerBackdrop, setShowCustomerBackdrop] = useState(false);
   const [showSummaryBackdrop, setShowSummaryBackdrop] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<any>(null);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodData | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const { toast, show: showToast } = useToast();
 
   const handleUpdateQuantity = (id: string, quantity: number) => {
     if (quantity > 0) {
@@ -48,19 +60,46 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
 
   const handleStartPayment = () => {
     if (cart.items.length === 0) {
-      Alert.alert('Carrito vacío', 'Agregue productos para continuar');
+      showToast('Agregue productos al carrito para continuar', 'warning');
       return;
     }
-    setShowCardBackdrop(true);
+
+    if (!customer.email || !customer.fullName) {
+      setShowCustomerBackdrop(true);
+    } else {
+      setShowCardBackdrop(true);
+    }
   };
 
-  const handleCardComplete = (data: any) => {
+  const handleCustomerComplete = (data: { email: string; fullName: string }) => {
+    dispatch(setCustomerData(data));
+    setShowCustomerBackdrop(false);
+    setTimeout(() => setShowCardBackdrop(true), 300);
+  };
+
+  const handleCardComplete = (data: PaymentMethodData) => {
     setPaymentMethod(data);
     setShowCardBackdrop(false);
     setTimeout(() => setShowSummaryBackdrop(true), 300);
   };
 
   const handleConfirmPayment = async () => {
+    // Validar integridad de los datos antes de proceder (Unhappy Path: datos incompletos)
+    if (!paymentMethod) {
+      showToast('Por favor, complete los datos de su tarjeta', 'error');
+      return;
+    }
+
+    if (!customer.email || !customer.fullName) {
+      showToast('Datos del cliente incompletos. Por favor regrese e ingréselos.', 'error');
+      return;
+    }
+
+    if (cart.items.length === 0) {
+      showToast('El carrito está vacío', 'error');
+      return;
+    }
+
     setIsProcessing(true);
     const correlationId = uuidv4();
     const idempotencyKey = uuidv4();
@@ -108,14 +147,27 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
           status: 'APPROVED',
         });
       } else {
-        const errorMsg = finalStatus === 'DECLINED' ? 'Transacción rechazada' : 'Error técnico';
+        const errorMsg =
+          finalStatus === 'DECLINED'
+            ? 'Transacción rechazada por el banco emisor'
+            : 'Error técnico al procesar el pago';
         dispatch(checkoutFailure(errorMsg));
-        Alert.alert('Pago Fallido', errorMsg);
+        showToast(errorMsg, 'error');
+        setTimeout(() => {
+          setShowSummaryBackdrop(false);
+          navigation.navigate('Result', {
+            transactionId: finalTransactionId,
+            status: finalStatus as 'DECLINED' | 'ERROR',
+          });
+        }, 2000);
       }
     } catch (error: any) {
       const msg = error.message || 'Error al procesar pago';
       dispatch(checkoutFailure(msg));
-      Alert.alert('Error', msg);
+      showToast(msg, 'error');
+      setTimeout(() => {
+        setIsProcessing(false);
+      }, 2000);
     } finally {
       setIsProcessing(false);
     }
@@ -194,6 +246,10 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
         <CardFormComponent onComplete={handleCardComplete} />
       </Backdrop>
 
+      <Backdrop visible={showCustomerBackdrop} onClose={() => setShowCustomerBackdrop(false)}>
+        <CustomerFormComponent initialData={customer} onComplete={handleCustomerComplete} />
+      </Backdrop>
+
       <Backdrop visible={showSummaryBackdrop} onClose={() => setShowSummaryBackdrop(false)}>
         <PaymentSummaryComponent
           cart={cart}
@@ -203,6 +259,14 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
           loading={isProcessing}
         />
       </Backdrop>
+
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onDismiss={() => showToast('', 'info')}
+        />
+      )}
     </SafeAreaView>
   );
 };

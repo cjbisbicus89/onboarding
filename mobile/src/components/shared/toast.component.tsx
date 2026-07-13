@@ -1,19 +1,62 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Animated } from 'react-native';
 
 export type ToastType = 'info' | 'success' | 'warning' | 'error';
 
 interface ToastProps {
   message: string;
   type?: ToastType;
+  duration?: number;
+  onDismiss?: () => void;
 }
 
-export const Toast: React.FC<ToastProps> = ({ message, type = 'info' }) => {
+const TOAST_DEFAULT_DURATION_MS = 4000;
+
+export const Toast: React.FC<ToastProps> = ({
+  message,
+  type = 'info',
+  duration = TOAST_DEFAULT_DURATION_MS,
+  onDismiss,
+}) => {
+  const opacity = useState(new Animated.Value(0))[0];
+
+  useEffect(() => {
+    Animated.timing(opacity, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+
+    const timer = setTimeout(() => {
+      Animated.timing(opacity, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start(onDismiss);
+    }, duration);
+
+    return () => clearTimeout(timer);
+  }, [duration, opacity, onDismiss]);
+
   return (
-    <View style={[styles.container, styles[type]]}>
+    <Animated.View style={[styles.container, styles[type], { opacity }]}>
       <Text style={styles.text}>{message}</Text>
-    </View>
+    </Animated.View>
   );
+};
+
+export const useToast = () => {
+  const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
+
+  const show = (message: string, type: ToastType = 'info') => {
+    setToast({ message, type });
+  };
+
+  const hide = () => {
+    setToast(null);
+  };
+
+  return { toast, show, hide };
 };
 
 const styles = StyleSheet.create({

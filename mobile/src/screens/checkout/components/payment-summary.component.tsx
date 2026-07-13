@@ -25,7 +25,7 @@ interface Props {
   paymentMethod: {
     cardNumber: string;
     holderName: string;
-  };
+  } | null;
   onConfirm: () => void;
   loading?: boolean;
 }
@@ -78,10 +78,16 @@ export const PaymentSummaryComponent: React.FC<Props> = ({
           <CreditCard size={20} color="#f4511e" />
           <Text style={styles.sectionTitle}>Pago</Text>
         </View>
-        <Text style={styles.infoText}>
-          Tarjeta terminada en {paymentMethod.cardNumber.slice(-4)}
-        </Text>
-        <Text style={styles.infoText}>{paymentMethod.holderName}</Text>
+        {paymentMethod ? (
+          <>
+            <Text style={styles.infoText}>
+              Tarjeta terminada en {paymentMethod.cardNumber.slice(-4)}
+            </Text>
+            <Text style={styles.infoText}>{paymentMethod.holderName}</Text>
+          </>
+        ) : (
+          <Text style={styles.infoText}>Método de pago no seleccionado</Text>
+        )}
       </View>
 
       <TouchableOpacity
