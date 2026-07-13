@@ -91,6 +91,14 @@ export const PaymentSummaryComponent: React.FC<Props> = ({
         )}
       </View>
 
+      <View style={styles.legalSection}>
+        <Text style={styles.legalText}>
+          Al confirmar el pago, aceptas los{' '}
+          <Text style={styles.legalLink}>Términos y Condiciones</Text> y el{' '}
+          <Text style={styles.legalLink}>Aviso de Privacidad</Text> de la pasarela de pagos.
+        </Text>
+      </View>
+
       <TouchableOpacity
         style={[styles.confirmButton, loading && styles.disabledButton]}
         onPress={onConfirm}
@@ -175,6 +183,22 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.md,
     color: COLORS.textDark,
     marginBottom: SPACING.xs / 2,
+  },
+  legalSection: {
+    marginTop: SPACING.sm,
+    marginBottom: SPACING.md,
+    paddingHorizontal: SPACING.xs,
+  },
+  legalText: {
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    lineHeight: 18,
+  },
+  legalLink: {
+    color: COLORS.primary,
+    fontWeight: 'bold',
+    textDecorationLine: 'underline',
   },
   confirmButton: {
     backgroundColor: COLORS.success,
