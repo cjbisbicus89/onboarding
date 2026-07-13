@@ -239,6 +239,7 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
         keyExtractor={(item) => item.productId}
         renderItem={renderItem}
         contentContainerStyle={styles.listContent}
+        keyboardShouldPersistTaps="handled"
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>Tu carrito está vacío</Text>

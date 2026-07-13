@@ -9,6 +9,7 @@ import {
   Alert,
   Platform,
   Dimensions,
+  SafeAreaView,
 } from 'react-native';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { addItem } from '../../store/slices/cart.slice';
@@ -56,31 +57,21 @@ const ProductDetailScreen: React.FC<Props> = ({ route, navigation }) => {
 
   const handleAddToCart = () => {
     if (product.stock <= 0) {
-      if (Platform.OS === 'web') {
-        window.alert('Este producto no está disponible actualmente.');
-      } else {
-        Alert.alert('Sin stock', 'Este producto no está disponible actualmente.');
-      }
+      Alert.alert('Sin stock', 'Este producto no está disponible actualmente.');
       return;
     }
 
     const quantityToAdd = Math.min(quantity, product.stock);
     dispatch(addItem({ ...product, productId: product.id, quantity: quantityToAdd }));
 
-    if (Platform.OS === 'web') {
-      if (window.confirm(`${quantityToAdd} unidad(es) de ${product.name} se han añadido al carrito. ¿Deseas ir al checkout?`)) {
-        navigation.navigate('Checkout');
-      }
-    } else {
-      Alert.alert(
-        'Añadido',
-        `${quantityToAdd} unidad(es) de ${product.name} se han añadido al carrito`,
-        [
-          { text: 'Seguir comprando', style: 'cancel' },
-          { text: 'Ir al checkout', onPress: () => navigation.navigate('Checkout') },
-        ]
-      );
-    }
+    Alert.alert(
+      'Añadido',
+      `${quantityToAdd} unidad(es) de ${product.name} se han añadido al carrito`,
+      [
+        { text: 'Seguir comprando', style: 'cancel' },
+        { text: 'Ir al checkout', onPress: () => navigation.navigate('Checkout') },
+      ]
+    );
   };
 
   return (

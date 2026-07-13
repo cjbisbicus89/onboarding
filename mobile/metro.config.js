@@ -18,6 +18,7 @@ const config = {
       path.resolve(workspaceRoot, 'node_modules'),
     ],
     disableHierarchicalLookup: true,
+    blockList: /\/_cleanup_backup\//,
   },
 };
 

@@ -6,7 +6,12 @@ module.exports = {
   ],
   moduleNameMapper: {
     '^@shared/(.*)$': '<rootDir>/../shared/$1',
+    '^@babel/runtime/(.*)$': '<rootDir>/node_modules/@babel/runtime/$1',
   },
+  watchPathIgnorePatterns: [
+    '<rootDir>/node_modules/',
+    '<rootDir>/_cleanup_backup/',
+  ],
   collectCoverage: true,
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',

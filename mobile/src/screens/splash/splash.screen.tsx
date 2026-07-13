@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, SafeAreaView } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types/navigation.types';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
@@ -95,19 +95,23 @@ const SplashScreen: React.FC<Props> = ({ navigation }) => {
 
   if (polling) {
     return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
-        <Text style={styles.title}>Verificando estado de transacción...</Text>
-      </View>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.content}>
+          <ActivityIndicator size="large" color={COLORS.white} />
+          <Text style={styles.title}>Verificando estado de transacción...</Text>
+        </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Checkout App</Text>
-      <ActivityIndicator size="large" color={COLORS.primary} />
-      <Text style={styles.subtitle}>Cargando catálogo...</Text>
-    </View>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.content}>
+        <Text style={styles.title}>Checkout App</Text>
+        <ActivityIndicator size="large" color={COLORS.white} />
+        <Text style={styles.subtitle}>Cargando catálogo...</Text>
+      </View>
+    </SafeAreaView>
   );
 };
 
@@ -115,6 +119,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.primary,
+  },
+  content: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: SPACING.lg,

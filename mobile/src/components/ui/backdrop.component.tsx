@@ -6,6 +6,9 @@ import {
   Animated,
   Dimensions,
   Modal,
+  KeyboardAvoidingView,
+  ScrollView,
+  Platform,
 } from 'react-native';
 import { COLORS, BORDER_RADIUS } from '../../infrastructure/theme';
 
@@ -94,7 +97,18 @@ export const Backdrop: React.FC<BackdropProps> = ({
           style={[styles.backdrop, { transform: [{ translateY }] }]}
           {...panResponder.panHandlers}
         >
-          {children}
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.container}
+          >
+            <ScrollView
+              contentContainerStyle={styles.scrollContent}
+              bounces={false}
+              showsVerticalScrollIndicator={false}
+            >
+              {children}
+            </ScrollView>
+          </KeyboardAvoidingView>
         </Animated.View>
       </View>
     </Modal>
@@ -110,7 +124,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: height * BACKDROP_HEIGHT_RATIO,
+    maxHeight: height * BACKDROP_HEIGHT_RATIO,
     backgroundColor: COLORS.background,
     borderTopLeftRadius: BACKDROP_BORDER_RADIUS,
     borderTopRightRadius: BACKDROP_BORDER_RADIUS,
@@ -119,5 +133,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 10,
     elevation: 5,
+  },
+  container: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
 });

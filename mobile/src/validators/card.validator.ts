@@ -9,14 +9,17 @@ import {
   MAX_CVC_LENGTH,
 } from '../../../shared/utils/card-validator';
 
+export type {
+  CardValidationResult,
+  ExpiryValidationResult,
+};
+
 export {
   MIN_CARD_NUMBER_LENGTH,
   MAX_CARD_NUMBER_LENGTH,
   MIN_CVC_LENGTH,
   MAX_CVC_LENGTH,
   CardBrand,
-  CardValidationResult,
-  ExpiryValidationResult,
 };
 
 export class CardValidator {
