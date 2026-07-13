@@ -6,7 +6,7 @@ import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from './src/store';
 import { RootNavigator } from './src/navigation/root-navigator';
 import { ErrorBoundary } from './src/components/shared/error-boundary.component';
-import { StatusBar } from 'expo-status-bar';
+import { StatusBar } from 'react-native';
 
 export default function App() {
   return (
@@ -15,7 +15,7 @@ export default function App() {
         <PersistGate persistor={persistor} loading={null}>
           <NavigationContainer>
             <RootNavigator />
-            <StatusBar style="auto" />
+            <StatusBar barStyle="dark-content" />
           </NavigationContainer>
         </PersistGate>
       </Provider>

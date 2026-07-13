@@ -1,8 +1,8 @@
 module.exports = {
-  preset: 'jest-expo',
+  preset: 'react-native',
   setupFilesAfterEnv: ['@testing-library/jest-native/extend-expect'],
   transformIgnorePatterns: [
-    'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|immer|redux-persist|redux-persist-transform-encrypt|@react-native-async-storage/async-storage|lucide-react-native|uuid)',
+    'node_modules/(?!(jest-)?react-native|@react-native(-community)?|react-navigation|@react-navigation/.*|react-native-svg|immer|redux-persist|redux-persist-transform-encrypt|@react-native-async-storage/async-storage|lucide-react-native|uuid)',
   ],
   moduleNameMapper: {
     '^@shared/(.*)$': '<rootDir>/../shared/$1',

@@ -18,13 +18,13 @@ import customerReducer, { type CustomerState } from '../application/state/slices
 import transactionReducer, { type TransactionState } from './slices/transaction.slice';
 import checkoutReducer, { type CheckoutState } from '../application/state/slices/checkoutSlice';
 
-const SECRET_KEY = process.env.EXPO_PUBLIC_REDUX_SECRET_KEY;
+const SECRET_KEY = process.env.REDUX_SECRET_KEY || 'mobile-secure-storage-key-fallback-32chars';
 
 const MIN_SECRET_KEY_LENGTH = 8;
 
 if (!SECRET_KEY || SECRET_KEY.length < MIN_SECRET_KEY_LENGTH) {
   throw new Error(
-    'EXPO_PUBLIC_REDUX_SECRET_KEY no está definida o es muy corta. Revisa tu archivo .env',
+    'REDUX_SECRET_KEY no está definida o es muy corta. Revisa tu archivo .env',
   );
 }
 
