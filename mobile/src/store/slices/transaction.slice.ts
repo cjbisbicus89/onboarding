@@ -1,4 +1,25 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { v4 as uuidv4 } from 'uuid';
+import { checkoutClient } from '../../services/api/checkout-client.service';
+import { clearCart } from './cart.slice';
+
+export interface CheckoutItem {
+  productId: string;
+  quantity: number;
+}
+
+export interface ProcessCheckoutPayload {
+  localTransactionId: string;
+  items: CheckoutItem[];
+  customer: { email: string; fullName: string };
+  paymentMethod: {
+    cardNumber: string;
+    expMonth: string;
+    expYear: string;
+    cvc: string;
+    holderName: string;
+  };
+}
 
 export interface TransactionItem {
   productId: string;
@@ -32,6 +53,46 @@ const initialState: TransactionState = {
   apiError: null,
   isUnconfirmed: false,
 };
+
+export const processCheckout = createAsyncThunk<
+  { transactionId: string; status: Exclude<TransactionState['status'], 'IDLE'> },
+  ProcessCheckoutPayload
+>('transaction/processCheckout', async (payload, { dispatch, rejectWithValue }) => {
+  const { localTransactionId, items, customer, paymentMethod } = payload;
+  const correlationId = uuidv4();
+  const idempotencyKey = uuidv4();
+
+  dispatch(startCheckout(localTransactionId));
+
+  try {
+    const response = await checkoutClient.checkout(
+      { items, customer, paymentMethod },
+      idempotencyKey,
+      correlationId,
+    );
+
+    let finalTransactionId = response.transactionId;
+    let finalStatus = response.status;
+
+    if (response.status === 'PENDING') {
+      const polled = await checkoutClient.pollTransactionStatus(response.transactionId);
+      finalTransactionId = polled.transactionId;
+      finalStatus = polled.status;
+    }
+
+    dispatch(checkoutSuccess({ transactionId: finalTransactionId, status: finalStatus }));
+
+    if (finalStatus === 'APPROVED') {
+      dispatch(clearCart());
+    }
+
+    return { transactionId: finalTransactionId, status: finalStatus };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Error al procesar pago';
+    dispatch(checkoutFailure(message));
+    return rejectWithValue({ transactionId: localTransactionId, message });
+  }
+});
 
 const transactionSlice = createSlice({
   name: 'transaction',

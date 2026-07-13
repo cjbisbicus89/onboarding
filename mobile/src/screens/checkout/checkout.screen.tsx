@@ -10,8 +10,8 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { removeItem, updateItemQuantity, clearCart, CartItem } from '../../store/slices/cart.slice';
-import { startCheckout, checkoutSuccess, checkoutFailure } from '../../store/slices/transaction.slice';
+import { removeItem, updateItemQuantity, CartItem } from '../../store/slices/cart.slice';
+import { processCheckout } from '../../store/slices/transaction.slice';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types/navigation.types';
 import { Trash2, Plus, Minus, CreditCard, ArrowLeft } from 'lucide-react-native';
@@ -20,7 +20,6 @@ import { CardFormComponent } from './components/card-form.component';
 import { CustomerFormComponent } from './components/customer-form.component';
 import { PaymentSummaryComponent } from './components/payment-summary.component';
 import { setCustomerData } from '../../application/state/slices/customerSlice';
-import { checkoutClient } from '../../services/api/checkout-client.service';
 import { v4 as uuidv4 } from 'uuid';
 import { Toast, useToast } from '../../components/shared/toast.component';
 import { COLORS, FONT_SIZES, SPACING, BORDER_RADIUS, SIZES, SHADOWS } from '../../infrastructure/theme';
@@ -96,7 +95,6 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   const handleConfirmPayment = async () => {
-    // Validar integridad de los datos antes de proceder (Unhappy Path: datos incompletos)
     if (!paymentMethod) {
       showToast('Por favor, complete los datos de su tarjeta', 'error');
       return;
@@ -113,15 +111,12 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
     }
 
     setIsProcessing(true);
-    const correlationId = uuidv4();
-    const idempotencyKey = uuidv4();
     const transactionId = uuidv4();
 
-    dispatch(startCheckout(transactionId));
-
     try {
-      const response = await checkoutClient.checkout(
-        {
+      const result = await dispatch(
+        processCheckout({
+          localTransactionId: transactionId,
           items: cart.items.map((item) => ({
             productId: item.productId,
             quantity: item.quantity,
@@ -131,59 +126,41 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
             fullName: customer.fullName,
           },
           paymentMethod,
-        },
-        idempotencyKey,
-        correlationId,
-      );
-
-      let finalTransactionId = response.transactionId;
-      let finalStatus = response.status;
-      if (response.status === 'PENDING') {
-        const polled = await checkoutClient.pollTransactionStatus(response.transactionId);
-        finalTransactionId = polled.transactionId;
-        finalStatus = polled.status;
-      }
-
-      dispatch(
-        checkoutSuccess({
-          transactionId: finalTransactionId,
-          status: finalStatus,
         })
-      );
+      ).unwrap();
 
-      if (finalStatus === 'APPROVED') {
-        dispatch(clearCart());
+      if (result.status === 'APPROVED') {
         setShowSummaryBackdrop(false);
         navigation.navigate('Result', {
-          transactionId: finalTransactionId,
+          transactionId: result.transactionId,
           status: 'APPROVED',
         });
       } else {
         const errorMsg =
-          finalStatus === 'DECLINED'
+          result.status === 'DECLINED'
             ? 'Transacción rechazada por el banco emisor'
-            : finalStatus === 'PENDING'
+            : result.status === 'PENDING'
             ? 'El pago está siendo procesado, verificaremos su estado al reiniciar la app'
             : 'Error técnico al procesar el pago';
-        dispatch(checkoutFailure(errorMsg));
         showToast(errorMsg, 'error');
         setTimeout(() => {
           setShowSummaryBackdrop(false);
           navigation.navigate('Result', {
-            transactionId: finalTransactionId,
-            status: finalStatus,
+            transactionId: result.transactionId,
+            status: result.status,
           });
         }, ERROR_NAVIGATION_DELAY_MS);
       }
     } catch (error) {
-      const msg = getErrorMessage(error);
-      dispatch(checkoutFailure(msg));
+      const rejected = error as { transactionId?: string; message?: string } | undefined;
+      const finalTransactionId = rejected?.transactionId ?? transactionId;
+      const msg = rejected?.message ?? getErrorMessage(error);
       showToast(msg, 'error');
       setTimeout(() => {
         setShowSummaryBackdrop(false);
         setIsProcessing(false);
         navigation.navigate('Result', {
-          transactionId: transactionId,
+          transactionId: finalTransactionId,
           status: 'ERROR',
         });
       }, ERROR_NAVIGATION_DELAY_MS);

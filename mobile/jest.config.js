@@ -2,7 +2,7 @@ module.exports = {
   preset: 'react-native',
   setupFilesAfterEnv: ['@testing-library/jest-native/extend-expect'],
   transformIgnorePatterns: [
-    'node_modules/(?!(jest-)?react-native|@react-native(-community)?|react-navigation|@react-navigation/.*|react-native-svg|immer|redux-persist|redux-persist-transform-encrypt|@react-native-async-storage/async-storage|lucide-react-native|uuid)',
+    'node_modules/(?!(jest-)?react-native|@react-native(-community)?|react-navigation|@react-navigation/.*|react-native-svg|immer|redux-persist|react-native-encrypted-storage|lucide-react-native|uuid)',
   ],
   moduleNameMapper: {
     '^@shared/(.*)$': '<rootDir>/../shared/$1',

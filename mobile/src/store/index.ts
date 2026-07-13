@@ -10,51 +10,26 @@ import {
   PURGE,
   REGISTER,
 } from 'redux-persist';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { encryptTransform } from 'redux-persist-transform-encrypt';
+import EncryptedStorage from 'react-native-encrypted-storage';
 import catalogReducer, { type CatalogState } from '../application/state/slices/catalogSlice';
 import cartReducer, { type CartState } from './slices/cart.slice';
 import customerReducer, { type CustomerState } from '../application/state/slices/customerSlice';
 import transactionReducer, { type TransactionState } from './slices/transaction.slice';
 import checkoutReducer, { type CheckoutState } from '../application/state/slices/checkoutSlice';
 
-const SECRET_KEY = process.env.REDUX_SECRET_KEY || 'mobile-secure-storage-key-fallback-32chars';
-
-const MIN_SECRET_KEY_LENGTH = 8;
-
-if (!SECRET_KEY || SECRET_KEY.length < MIN_SECRET_KEY_LENGTH) {
-  throw new Error(
-    'REDUX_SECRET_KEY no está definida o es muy corta. Revisa tu archivo .env',
-  );
-}
-
-const createEncryptTransform = (label: string) =>
-  encryptTransform({
-    secretKey: SECRET_KEY,
-    onError: (error) => {
-      if (__DEV__) {
-        // eslint-disable-next-line no-console
-        console.error(`Error al desencriptar ${label}:`, error);
-      }
-    },
-  });
-
 const cartPersistConfig = {
   key: 'cart',
-  storage: AsyncStorage,
-  transforms: [createEncryptTransform('el carrito')],
+  storage: EncryptedStorage,
 };
 
 const transactionPersistConfig = {
   key: 'transaction',
-  storage: AsyncStorage,
-  transforms: [createEncryptTransform('la transacción')],
+  storage: EncryptedStorage,
 };
 
 const customerPersistConfig = {
   key: 'customer',
-  storage: AsyncStorage,
-  transforms: [createEncryptTransform('los datos del cliente')],
+  storage: EncryptedStorage,
 };
 
 export const store = configureStore({
