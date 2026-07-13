@@ -26,7 +26,7 @@ export class ProductsController {
       name: product.name,
       description: product.description,
       imageUrl: product.imageUrl,
-      priceAmount: product.price.toCents(),
+      priceCentavos: product.price.toCents(),
       currency: product.price.currency,
       stock: product.stock,
     }));
@@ -62,7 +62,7 @@ export class ProductsController {
       name: product.name,
       description: product.description,
       imageUrl: product.imageUrl,
-      priceAmount: product.price.toCents(),
+      priceCentavos: product.price.toCents(),
       currency: product.price.currency,
       stock: product.stock,
     };

@@ -29,7 +29,7 @@ describe('catalogSlice', () => {
         name: 'Product 1',
         description: 'Desc 1',
         imageUrl: 'img1',
-        priceAmount: 100,
+        priceCentavos: 100,
         currency: 'USD',
         stock: 10,
       },

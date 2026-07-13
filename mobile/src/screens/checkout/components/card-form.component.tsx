@@ -8,12 +8,21 @@ import {
   ActivityIndicator,
   Dimensions,
 } from 'react-native';
-import { CardValidator } from '../../../validators/card.validator';
+import {
+  CardValidator,
+  MAX_CARD_NUMBER_LENGTH,
+  MIN_CVC_LENGTH,
+  MAX_CVC_LENGTH,
+  CardBrand,
+} from '../../../validators/card.validator';
+import { CardBrandLogo } from '../../../components/ui/card-brand-logo.component';
 import { CreditCard, Calendar, Lock, User } from 'lucide-react-native';
 
 const { width, height } = Dimensions.get('window');
 const responsiveWidth = (p: number) => (width * p) / 100;
 const responsiveHeight = (p: number) => (height * p) / 100;
+
+const EXPIRY_MAX_LENGTH = 5;
 
 interface Props {
   onComplete: (data: {
@@ -32,7 +41,7 @@ export const CardFormComponent: React.FC<Props> = ({ onComplete, loading }) => {
   const [cvc, setCvc] = useState('');
   const [holderName, setHolderName] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [brand, setBrand] = useState<'VISA' | 'MASTERCARD' | 'UNKNOWN'>('UNKNOWN');
+  const [brand, setBrand] = useState<CardBrand>(CardBrand.UNKNOWN);
 
   useEffect(() => {
     const detected = CardValidator.detectBrand(cardNumber);
@@ -49,24 +58,25 @@ export const CardFormComponent: React.FC<Props> = ({ onComplete, loading }) => {
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
-    
+
     try {
       CardValidator.assert(cardNumber, brand);
     } catch (e: any) {
       newErrors.cardNumber = e.message;
     }
 
-    if (!expiry || expiry.length !== 5) {
-      newErrors.expiry = 'Fecha inválida (MM/YY)';
-    } else {
-      const [m, y] = expiry.split('/');
-      const month = parseInt(m, 10);
-      const year = parseInt(y, 10);
-      if (month < 1 || month > 12) newErrors.expiry = 'Mes inválido';
+    const expiryValidation = CardValidator.validateExpiry(expiry);
+    if (!expiryValidation.isValid) {
+      newErrors.expiry = expiryValidation.error ?? 'Fecha inválida';
     }
 
-    if (!cvc || cvc.length < 3) newErrors.cvc = 'CVC inválido';
-    if (!holderName) newErrors.holderName = 'Nombre requerido';
+    if (!CardValidator.isValidCvc(cvc)) {
+      newErrors.cvc = `CVC inválido: debe tener ${MIN_CVC_LENGTH} o ${MAX_CVC_LENGTH} dígitos`;
+    }
+
+    if (!holderName.trim()) {
+      newErrors.holderName = 'Nombre requerido';
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -97,12 +107,10 @@ export const CardFormComponent: React.FC<Props> = ({ onComplete, loading }) => {
           value={cardNumber}
           onChangeText={setCardNumber}
           keyboardType="numeric"
-          maxLength={19}
+          maxLength={MAX_CARD_NUMBER_LENGTH}
           editable={!loading}
         />
-        {brand !== 'UNKNOWN' && (
-          <Text style={styles.brandText}>{brand}</Text>
-        )}
+        <CardBrandLogo brand={brand} />
       </View>
       {errors.cardNumber && <Text style={styles.errorText}>{errors.cardNumber}</Text>}
 
@@ -115,7 +123,7 @@ export const CardFormComponent: React.FC<Props> = ({ onComplete, loading }) => {
             value={expiry}
             onChangeText={handleExpiryChange}
             keyboardType="numeric"
-            maxLength={5}
+            maxLength={EXPIRY_MAX_LENGTH}
             editable={!loading}
           />
         </View>
@@ -127,7 +135,7 @@ export const CardFormComponent: React.FC<Props> = ({ onComplete, loading }) => {
             value={cvc}
             onChangeText={setCvc}
             keyboardType="numeric"
-            maxLength={4}
+            maxLength={MAX_CVC_LENGTH}
             secureTextEntry
             editable={!loading}
           />

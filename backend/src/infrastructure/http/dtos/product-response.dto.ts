@@ -30,7 +30,7 @@ export class ProductResponseDto {
     description: 'Precio en centavos',
     example: 45000,
   })
-  readonly priceAmount: number;
+  readonly priceCentavos: number;
 
   @ApiProperty({
     description: 'Moneda',

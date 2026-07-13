@@ -46,7 +46,12 @@ export class ProcessCheckoutUseCase {
     }
 
     const products = await this.validateProductsAndStock(command.items);
-    CardValidator.assertValid(command.card.number);
+    CardValidator.assertValid({
+      number: command.card.number,
+      expMonth: command.card.expMonth,
+      expYear: command.card.expYear,
+      cvc: command.card.cvc,
+    });
     const customer = await this.resolveCustomer(command);
     const transaction = await this.createAndSavePendingTransaction(
       command,

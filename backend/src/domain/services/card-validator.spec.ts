@@ -30,13 +30,36 @@ describe('CardValidator', () => {
 
   describe('assertValid', () => {
     it('assertValid_whenCardNumberIsValid_doesNotThrow', () => {
-      expect(() => CardValidator.assertValid('4111111111111111')).not.toThrow();
+      expect(() =>
+        CardValidator.assertValid({
+          number: '4111111111111111',
+          expMonth: '12',
+          expYear: '2030',
+          cvc: '123',
+        }),
+      ).not.toThrow();
     });
 
     it('assertValid_whenCardNumberIsInvalid_throwsDomainException', () => {
-      expect(() => CardValidator.assertValid('4111111111111112')).toThrow(
-        DomainException,
-      );
+      expect(() =>
+        CardValidator.assertValid({
+          number: '4111111111111112',
+          expMonth: '12',
+          expYear: '2030',
+          cvc: '123',
+        }),
+      ).toThrow(DomainException);
+    });
+
+    it('assertValid_whenExpiryIsInvalid_throwsDomainException', () => {
+      expect(() =>
+        CardValidator.assertValid({
+          number: '4111111111111111',
+          expMonth: '13',
+          expYear: '2030',
+          cvc: '123',
+        }),
+      ).toThrow(DomainException);
     });
   });
 });
