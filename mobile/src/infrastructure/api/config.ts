@@ -8,7 +8,5 @@ export const CONFIG = {
   // En iOS y dispositivos reales (en la misma red), usar la IP de la máquina.
   API_BASE_URL: Platform.OS === 'android'
     ? 'http://10.0.2.2:3000/api/v1'
-    : (Platform.OS === 'web' || (typeof window !== 'undefined' && typeof window.location !== 'undefined'))
-      ? `http://${typeof window !== 'undefined' && window.location?.hostname ? window.location.hostname : 'localhost'}:3000/api/v1`
-      : 'http://localhost:3000/api/v1',
+    : 'http://localhost:3000/api/v1',
 };
