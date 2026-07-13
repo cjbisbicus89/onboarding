@@ -157,9 +157,9 @@ export class PaymentProviderAdapter implements PaymentGatewayPort {
           correlationId,
         });
 
-        // Las transacciones con tarjeta en Wompi se crean en PENDING y se
-        // finalizan asincrónicamente. Realizamos polling para obtener el estado
-        // final dentro del timeout permitido, conforme a prueba.md §3.2.
+        // Las transacciones con tarjeta en el proveedor de pagos se crean en
+        // PENDING y se finalizan asincrónicamente. Realizamos polling para
+        // obtener el estado final dentro del timeout permitido.
         if (providerStatus === 'PENDING') {
           providerStatus = await this.pollFinalStatus(
             providerReference,

@@ -38,6 +38,25 @@ describe('cart.slice', () => {
     expect(state.itemCount).toBe(2);
   });
 
+  it('should add N items at once when quantity is provided', () => {
+    const state = cartReducer(initialState, addItem({ ...mockItem, quantity: 5 }));
+    expect(state.items).toHaveLength(1);
+    expect(state.items[0].quantity).toBe(5);
+    expect(state.totalAmountCentavos).toBe(750000);
+    expect(state.itemCount).toBe(5);
+  });
+
+  it('should not exceed stock when adding items', () => {
+    const state = cartReducer(initialState, addItem({ ...mockItem, quantity: 15 }));
+    expect(state.items[0].quantity).toBe(10);
+  });
+
+  it('should not exceed stock when adding to existing item', () => {
+    let state = cartReducer(initialState, addItem({ ...mockItem, quantity: 8 }));
+    state = cartReducer(state, addItem({ ...mockItem, quantity: 5 }));
+    expect(state.items[0].quantity).toBe(10);
+  });
+
   it('should remove an item', () => {
     let state = cartReducer(initialState, addItem(mockItem));
     state = cartReducer(state, removeItem(mockItem.productId));
