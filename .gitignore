@@ -1,0 +1,29 @@
+# Variables de entorno con datos sensibles
+.env
+.env.local
+.env.production
+.env.development
+
+# Archivos de configuración con URLs reales
+render.yaml.production
+docker-compose.override.yml
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependencias
+node_modules/
+
+# Cobertura de pruebas
+coverage/
+
+# Distribuciones
+dist/
+
+# Documentos internos no publicables
+prueba.md
+architecture.md
+coding-standards.md
