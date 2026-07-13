@@ -6,6 +6,7 @@ import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { resetTransactionState } from '../../store/slices/transaction.slice';
 import { clearCart } from '../../store/slices/cart.slice';
 import { checkoutClient } from '../../services/api/checkout-client.service';
+import { COLORS, FONT_SIZES, SPACING } from '../../infrastructure/theme';
 
 type SplashScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Splash'>;
 
@@ -26,6 +27,7 @@ const SplashScreen: React.FC<Props> = ({ navigation }) => {
   const isMountedRef = useRef(true);
 
   useEffect(() => {
+    pollCount.current = 0;
     return () => {
       isMountedRef.current = false;
       if (timerRef.current) {
@@ -94,7 +96,7 @@ const SplashScreen: React.FC<Props> = ({ navigation }) => {
   if (polling) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#f4511e" />
+        <ActivityIndicator size="large" color={COLORS.primary} />
         <Text style={styles.title}>Verificando estado de transacción...</Text>
       </View>
     );
@@ -103,7 +105,7 @@ const SplashScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Checkout App</Text>
-      <ActivityIndicator size="large" color="#f4511e" />
+      <ActivityIndicator size="large" color={COLORS.primary} />
       <Text style={styles.subtitle}>Cargando catálogo...</Text>
     </View>
   );
@@ -112,22 +114,22 @@ const SplashScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f4511e',
+    backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: SPACING.lg,
   },
   title: {
-    fontSize: 32,
+    fontSize: FONT_SIZES.titleLarge,
     fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 20,
+    color: COLORS.white,
+    marginBottom: SPACING.lg,
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: 16,
-    color: '#fff',
-    marginTop: 20,
+    fontSize: FONT_SIZES.base,
+    color: COLORS.white,
+    marginTop: SPACING.lg,
   },
 });
 

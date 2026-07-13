@@ -20,22 +20,15 @@ import {
   Home,
   RefreshCw,
 } from 'lucide-react-native';
+import { COLORS, FONT_SIZES, SPACING, BORDER_RADIUS, SHADOWS, SIZES } from '../../infrastructure/theme';
 
 const { width } = Dimensions.get('window');
 
-const ICON_SIZE = 100;
-const HOME_BUTTON_HEIGHT = 56;
-const HOME_BUTTON_RADIUS = 28;
-const TRANSACTION_ID_FONT_SIZE = 14;
-const TITLE_FONT_SIZE = 28;
-const SUBTITLE_FONT_SIZE = 16;
-const BUTTON_TEXT_FONT_SIZE = 18;
-
-const ICON_MARGIN_BOTTOM = 30;
-const TITLE_MARGIN_BOTTOM = 15;
-const SUBTITLE_MARGIN_BOTTOM = 30;
-const TRANSACTION_ID_MARGIN_BOTTOM = 40;
-const BUTTON_ICON_MARGIN_RIGHT = 10;
+const ICON_MARGIN_BOTTOM = SPACING.xxl;
+const TITLE_MARGIN_BOTTOM = SPACING.md;
+const SUBTITLE_MARGIN_BOTTOM = SPACING.xxl;
+const TRANSACTION_ID_MARGIN_BOTTOM = SPACING.xxxl;
+const BUTTON_ICON_MARGIN_RIGHT = SPACING.sm;
 
 const RESULT_STATUS = {
   APPROVED: 'APPROVED',
@@ -50,7 +43,6 @@ type ResultScreenRouteProp = RouteProp<RootStackParamList, 'Result'>;
 
 interface Props {
   route: ResultScreenRouteProp;
-  navigation: StackNavigationProp<RootStackParamList, 'Result'>;
 }
 
 interface ResultConfig {
@@ -64,32 +56,32 @@ const getResultConfig = (status: ResultStatus): ResultConfig => {
   switch (status) {
     case RESULT_STATUS.APPROVED:
       return {
-        icon: <CheckCircle2 color="#4CAF50" size={ICON_SIZE} style={styles.icon} />,
+        icon: <CheckCircle2 color={COLORS.success} size={SIZES.iconXLarge} style={styles.icon} />,
         title: '¡Pago Exitoso!',
         subtitle: 'Tu pedido ha sido procesado correctamente.',
-        primaryColor: '#4CAF50',
+        primaryColor: COLORS.success,
       };
     case RESULT_STATUS.DECLINED:
       return {
-        icon: <XCircle color="#f4511e" size={ICON_SIZE} style={styles.icon} />,
+        icon: <XCircle color={COLORS.error} size={SIZES.iconXLarge} style={styles.icon} />,
         title: 'Pago Rechazado',
         subtitle: 'La transacción fue rechazada por el banco emisor.',
-        primaryColor: '#f4511e',
+        primaryColor: COLORS.error,
       };
     case RESULT_STATUS.PENDING:
       return {
-        icon: <Clock color="#2196F3" size={ICON_SIZE} style={styles.icon} />,
+        icon: <Clock color={COLORS.info} size={SIZES.iconXLarge} style={styles.icon} />,
         title: 'Pago en Proceso',
         subtitle: 'Estamos verificando el estado de tu transacción.',
-        primaryColor: '#2196F3',
+        primaryColor: COLORS.info,
       };
     case RESULT_STATUS.ERROR:
     default:
       return {
-        icon: <AlertTriangle color="#FFC107" size={ICON_SIZE} style={styles.icon} />,
+        icon: <AlertTriangle color={COLORS.warning} size={SIZES.iconXLarge} style={styles.icon} />,
         title: 'Error en el Pago',
         subtitle: 'Ocurrió un problema técnico. Intenta nuevamente.',
-        primaryColor: '#FFC107',
+        primaryColor: COLORS.warning,
       };
   }
 };
@@ -98,7 +90,7 @@ const ResultScreen: React.FC<Props> = ({ route }) => {
   const { transactionId, status } = route.params;
   const dispatch = useAppDispatch();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-  const config = getResultConfig(status as ResultStatus);
+  const config = getResultConfig(status);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', (event) => {
@@ -137,7 +129,7 @@ const ResultScreen: React.FC<Props> = ({ route }) => {
           onPress={handleBackToHome}
           activeOpacity={0.8}
         >
-          <Home color="#fff" size={24} style={styles.buttonIcon} />
+          <Home color={COLORS.white} size={SIZES.iconLarge} style={styles.buttonIcon} />
           <Text style={styles.homeButtonText}>Volver al Home</Text>
         </TouchableOpacity>
 
@@ -147,7 +139,7 @@ const ResultScreen: React.FC<Props> = ({ route }) => {
             onPress={handleRetry}
             activeOpacity={0.8}
           >
-            <RefreshCw color={config.primaryColor} size={20} style={styles.buttonIcon} />
+            <RefreshCw color={config.primaryColor} size={SIZES.iconBase} style={styles.buttonIcon} />
             <Text style={[styles.retryButtonText, { color: config.primaryColor }]}>
               Intentar nuevamente
             </Text>
@@ -161,7 +153,7 @@ const ResultScreen: React.FC<Props> = ({ route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.background,
   },
   content: {
     flex: 1,
@@ -173,58 +165,54 @@ const styles = StyleSheet.create({
     marginBottom: ICON_MARGIN_BOTTOM,
   },
   title: {
-    fontSize: TITLE_FONT_SIZE,
+    fontSize: FONT_SIZES.title,
     fontWeight: 'bold',
-    color: '#333',
+    color: COLORS.textPrimary,
     marginBottom: TITLE_MARGIN_BOTTOM,
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: SUBTITLE_FONT_SIZE,
-    color: '#666',
+    fontSize: FONT_SIZES.base,
+    color: COLORS.textSecondary,
     textAlign: 'center',
     marginBottom: SUBTITLE_MARGIN_BOTTOM,
-    paddingHorizontal: 20,
+    paddingHorizontal: SPACING.lg,
   },
   transactionId: {
-    fontSize: TRANSACTION_ID_FONT_SIZE,
-    color: '#999',
+    fontSize: FONT_SIZES.md,
+    color: COLORS.textMuted,
     marginBottom: TRANSACTION_ID_MARGIN_BOTTOM,
   },
   homeButton: {
-    backgroundColor: '#f4511e',
+    backgroundColor: COLORS.primary,
     flexDirection: 'row',
-    height: HOME_BUTTON_HEIGHT,
-    borderRadius: HOME_BUTTON_RADIUS,
-    paddingHorizontal: 30,
+    height: SIZES.buttonHeight,
+    borderRadius: BORDER_RADIUS.lg,
+    paddingHorizontal: SPACING.xxl,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
+    ...SHADOWS.default,
   },
   retryButton: {
     flexDirection: 'row',
-    height: HOME_BUTTON_HEIGHT,
-    borderRadius: HOME_BUTTON_RADIUS,
-    paddingHorizontal: 30,
+    height: SIZES.buttonHeight,
+    borderRadius: BORDER_RADIUS.lg,
+    paddingHorizontal: SPACING.xxl,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 12,
+    marginTop: SPACING.md,
     borderWidth: 2,
   },
   buttonIcon: {
     marginRight: BUTTON_ICON_MARGIN_RIGHT,
   },
   homeButtonText: {
-    color: '#fff',
-    fontSize: BUTTON_TEXT_FONT_SIZE,
+    color: COLORS.white,
+    fontSize: FONT_SIZES.lg,
     fontWeight: 'bold',
   },
   retryButtonText: {
-    fontSize: BUTTON_TEXT_FONT_SIZE,
+    fontSize: FONT_SIZES.lg,
     fontWeight: 'bold',
   },
 });

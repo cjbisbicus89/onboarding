@@ -1,5 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
+import { COLORS, FONT_SIZES, SPACING } from '../../infrastructure/theme';
 
 interface Props {
   children: ReactNode;
@@ -53,18 +54,18 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#f5f5f5',
+    padding: SPACING.lg,
+    backgroundColor: COLORS.errorBackground,
   },
   title: {
-    fontSize: 20,
+    fontSize: FONT_SIZES.xl,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: SPACING.sm,
     textAlign: 'center',
   },
   message: {
-    fontSize: 16,
-    marginBottom: 20,
+    fontSize: FONT_SIZES.base,
+    marginBottom: SPACING.lg,
     textAlign: 'center',
   },
 });

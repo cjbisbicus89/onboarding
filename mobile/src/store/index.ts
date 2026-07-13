@@ -60,9 +60,9 @@ const customerPersistConfig = {
 export const store = configureStore({
   reducer: {
     catalog: catalogReducer,
-    cart: persistReducer(cartPersistConfig, cartReducer) as Reducer<any, AnyAction>,
-    customer: persistReducer(customerPersistConfig, customerReducer) as Reducer<any, AnyAction>,
-    transaction: persistReducer(transactionPersistConfig, transactionReducer) as Reducer<any, AnyAction>,
+    cart: persistReducer(cartPersistConfig, cartReducer) as Reducer<CartState & PersistedState, AnyAction>,
+    customer: persistReducer(customerPersistConfig, customerReducer) as Reducer<CustomerState & PersistedState, AnyAction>,
+    transaction: persistReducer(transactionPersistConfig, transactionReducer) as Reducer<TransactionState & PersistedState, AnyAction>,
     checkout: checkoutReducer,
   },
   middleware: (getDefaultMiddleware) =>
@@ -82,7 +82,7 @@ export interface PersistedState {
 export type RootState = {
   catalog: CatalogState;
   cart: CartState & PersistedState;
-  customer: CustomerState;
+  customer: CustomerState & PersistedState;
   transaction: TransactionState & PersistedState;
   checkout: CheckoutState;
 };

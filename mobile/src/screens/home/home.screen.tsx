@@ -16,6 +16,7 @@ import { addItem } from '../../store/slices/cart.slice';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types/navigation.types';
 import { ShoppingCart } from 'lucide-react-native';
+import { COLORS, FONT_SIZES, SPACING, BORDER_RADIUS, SIZES, SHADOWS } from '../../infrastructure/theme';
 
 const { width } = Dimensions.get('window');
 
@@ -54,7 +55,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#f4511e" />
+        <ActivityIndicator size="large" color={COLORS.primary} />
       </View>
     );
   }
@@ -82,7 +83,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         style={styles.cartButton}
         onPress={() => navigation.navigate('Checkout')}
       >
-        <ShoppingCart color="#fff" size={24} />
+        <ShoppingCart color={COLORS.white} size={SIZES.iconLarge} />
         {cartItemsCount > 0 && (
           <View style={styles.cartBadge}>
             <Text style={styles.cartBadgeText}>{cartItemsCount}</Text>
@@ -96,101 +97,93 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: COLORS.backgroundLight,
   },
   center: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: SPACING.lg,
   },
   listContent: {
-    padding: 15,
+    padding: SPACING.md,
   },
   productCard: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    marginBottom: 15,
+    backgroundColor: COLORS.background,
+    borderRadius: BORDER_RADIUS.md,
+    marginBottom: SPACING.md,
     overflow: 'hidden',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    ...SHADOWS.light,
     flexDirection: 'row',
   },
   productImage: {
     width: 100,
     height: 100,
-    backgroundColor: '#eee',
+    backgroundColor: COLORS.borderLight,
   },
   productInfo: {
     flex: 1,
-    padding: 10,
+    padding: SPACING.sm,
     justifyContent: 'center',
   },
   productName: {
-    fontSize: 16,
+    fontSize: FONT_SIZES.base,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: SPACING.xs,
   },
   productPrice: {
-    fontSize: 14,
-    color: '#f4511e',
+    fontSize: FONT_SIZES.md,
+    color: COLORS.primary,
     fontWeight: '600',
-    marginBottom: 3,
+    marginBottom: SPACING.xs / 2,
   },
   productStock: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.textSecondary,
   },
   errorText: {
-    fontSize: 16,
-    color: 'red',
+    fontSize: FONT_SIZES.base,
+    color: COLORS.error,
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: SPACING.lg,
   },
   retryButton: {
-    backgroundColor: '#f4511e',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 5,
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.sm,
+    borderRadius: BORDER_RADIUS.sm,
   },
   retryText: {
-    color: '#fff',
+    color: COLORS.white,
     fontWeight: 'bold',
   },
   cartButton: {
     position: 'absolute',
-    bottom: 20,
-    right: 20,
-    backgroundColor: '#f4511e',
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    bottom: SPACING.lg,
+    right: SPACING.lg,
+    backgroundColor: COLORS.primary,
+    width: SIZES.buttonHeightLarge,
+    height: SIZES.buttonHeightLarge,
+    borderRadius: BORDER_RADIUS.lg,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    ...SHADOWS.strong,
   },
   cartBadge: {
     position: 'absolute',
-    top: -5,
-    right: -5,
-    backgroundColor: 'red',
-    borderRadius: 10,
-    minWidth: 20,
-    height: 20,
+    top: -SPACING.xs,
+    right: -SPACING.xs,
+    backgroundColor: COLORS.error,
+    borderRadius: BORDER_RADIUS.md,
+    minWidth: SPACING.lg,
+    height: SPACING.lg,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 4,
+    paddingHorizontal: SPACING.xs,
   },
   cartBadgeText: {
-    color: '#fff',
-    fontSize: 12,
+    color: COLORS.white,
+    fontSize: FONT_SIZES.sm,
     fontWeight: 'bold',
   },
 });

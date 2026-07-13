@@ -17,6 +17,7 @@ import {
 } from '../../../validators/card.validator';
 import { CardBrandLogo } from '../../../components/ui/card-brand-logo.component';
 import { CreditCard, Calendar, Lock, User } from 'lucide-react-native';
+import { COLORS, FONT_SIZES, SPACING, BORDER_RADIUS, SIZES } from '../../../infrastructure/theme';
 
 const { width, height } = Dimensions.get('window');
 const responsiveWidth = (p: number) => (width * p) / 100;
@@ -61,8 +62,8 @@ export const CardFormComponent: React.FC<Props> = ({ onComplete, loading }) => {
 
     try {
       CardValidator.assert(cardNumber, brand);
-    } catch (e: any) {
-      newErrors.cardNumber = e.message;
+    } catch (error) {
+      newErrors.cardNumber = error instanceof Error ? error.message : 'Número de tarjeta inválido';
     }
 
     const expiryValidation = CardValidator.validateExpiry(expiry);
@@ -100,7 +101,7 @@ export const CardFormComponent: React.FC<Props> = ({ onComplete, loading }) => {
       <Text style={styles.title}>Datos de la Tarjeta</Text>
       
       <View style={styles.inputContainer}>
-        <CreditCard size={20} color="#666" style={styles.icon} />
+        <CreditCard size={SIZES.iconBase} color={COLORS.textSecondary} style={styles.icon} />
         <TextInput
           style={styles.input}
           placeholder="Número de tarjeta"
@@ -115,8 +116,8 @@ export const CardFormComponent: React.FC<Props> = ({ onComplete, loading }) => {
       {errors.cardNumber && <Text style={styles.errorText}>{errors.cardNumber}</Text>}
 
       <View style={styles.row}>
-        <View style={[styles.inputContainer, { flex: 1, marginRight: 10 }]}>
-          <Calendar size={20} color="#666" style={styles.icon} />
+        <View style={[styles.inputContainer, { flex: 1, marginRight: SPACING.sm }]}>
+          <Calendar size={SIZES.iconBase} color={COLORS.textSecondary} style={styles.icon} />
           <TextInput
             style={styles.input}
             placeholder="MM/YY"
@@ -128,7 +129,7 @@ export const CardFormComponent: React.FC<Props> = ({ onComplete, loading }) => {
           />
         </View>
         <View style={[styles.inputContainer, { flex: 1 }]}>
-          <Lock size={20} color="#666" style={styles.icon} />
+          <Lock size={SIZES.iconBase} color={COLORS.textSecondary} style={styles.icon} />
           <TextInput
             style={styles.input}
             placeholder="CVC"
@@ -147,7 +148,7 @@ export const CardFormComponent: React.FC<Props> = ({ onComplete, loading }) => {
       </View>
 
       <View style={styles.inputContainer}>
-        <User size={20} color="#666" style={styles.icon} />
+        <User size={SIZES.iconBase} color={COLORS.textSecondary} style={styles.icon} />
         <TextInput
           style={styles.input}
           placeholder="Nombre del titular"
@@ -165,7 +166,7 @@ export const CardFormComponent: React.FC<Props> = ({ onComplete, loading }) => {
         disabled={loading}
       >
         {loading ? (
-          <ActivityIndicator color="#fff" />
+          <ActivityIndicator color={COLORS.white} />
         ) : (
           <Text style={styles.buttonText}>Continuar</Text>
         )}
@@ -177,61 +178,61 @@ export const CardFormComponent: React.FC<Props> = ({ onComplete, loading }) => {
 const styles = StyleSheet.create({
   container: {
     padding: responsiveWidth(5),
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.background,
   },
   title: {
     fontSize: responsiveWidth(5),
     fontWeight: 'bold',
     marginBottom: responsiveHeight(2),
     textAlign: 'center',
-    color: '#333',
+    color: COLORS.textPrimary,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    marginBottom: 10,
-    paddingHorizontal: 10,
+    borderColor: COLORS.border,
+    borderRadius: BORDER_RADIUS.md,
+    marginBottom: SPACING.sm,
+    paddingHorizontal: SPACING.sm,
     height: responsiveHeight(6),
   },
   icon: {
-    marginRight: 10,
+    marginRight: SPACING.sm,
   },
   input: {
     flex: 1,
     fontSize: responsiveWidth(4),
-    color: '#333',
+    color: COLORS.textPrimary,
   },
   row: {
     flexDirection: 'row',
   },
   brandText: {
-    fontSize: 10,
+    fontSize: FONT_SIZES.xs,
     fontWeight: 'bold',
-    color: '#f4511e',
+    color: COLORS.primary,
   },
   errorText: {
-    color: 'red',
-    fontSize: 12,
-    marginBottom: 10,
-    marginLeft: 5,
+    color: COLORS.error,
+    fontSize: FONT_SIZES.sm,
+    marginBottom: SPACING.sm,
+    marginLeft: SPACING.xs,
   },
   button: {
-    backgroundColor: '#f4511e',
+    backgroundColor: COLORS.primary,
     height: responsiveHeight(7),
-    borderRadius: 8,
+    borderRadius: BORDER_RADIUS.md,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: SPACING.lg,
   },
   disabledButton: {
-    backgroundColor: '#ffab91',
+    backgroundColor: COLORS.primaryLight,
   },
   buttonText: {
-    color: '#fff',
-    fontSize: 18,
+    color: COLORS.white,
+    fontSize: FONT_SIZES.lg,
     fontWeight: 'bold',
   },
 });

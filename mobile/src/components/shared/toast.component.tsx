@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
+import { COLORS, SPACING } from '../../infrastructure/theme';
 
 export type ToastType = 'info' | 'success' | 'warning' | 'error';
 
@@ -11,6 +12,8 @@ interface ToastProps {
 }
 
 const TOAST_DEFAULT_DURATION_MS = 4000;
+const TOAST_ANIMATION_DURATION_MS = 300;
+const TOAST_Z_INDEX = 1000;
 
 export const Toast: React.FC<ToastProps> = ({
   message,
@@ -23,14 +26,14 @@ export const Toast: React.FC<ToastProps> = ({
   useEffect(() => {
     Animated.timing(opacity, {
       toValue: 1,
-      duration: 300,
+      duration: TOAST_ANIMATION_DURATION_MS,
       useNativeDriver: true,
     }).start();
 
     const timer = setTimeout(() => {
       Animated.timing(opacity, {
         toValue: 0,
-        duration: 300,
+        duration: TOAST_ANIMATION_DURATION_MS,
         useNativeDriver: true,
       }).start(onDismiss);
     }, duration);
@@ -65,18 +68,18 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    padding: 16,
+    padding: SPACING.base,
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 1000,
+    zIndex: TOAST_Z_INDEX,
   },
   text: {
-    color: '#fff',
+    color: COLORS.white,
     fontWeight: '600',
     textAlign: 'center',
   },
-  info: { backgroundColor: '#2196F3' },
-  success: { backgroundColor: '#4CAF50' },
-  warning: { backgroundColor: '#FF9800' },
-  error: { backgroundColor: '#F44336' },
+  info: { backgroundColor: COLORS.info },
+  success: { backgroundColor: COLORS.success },
+  warning: { backgroundColor: COLORS.warning },
+  error: { backgroundColor: COLORS.error },
 });

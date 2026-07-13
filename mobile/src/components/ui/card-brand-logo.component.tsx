@@ -1,6 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { CardBrand } from '../../validators/card.validator';
+import { COLORS, FONT_SIZES, SPACING } from '../../infrastructure/theme';
+
+const VISA_BACKGROUND = '#1A1F71';
+const MASTERCARD_BACKGROUND = '#EB001B';
+const BRAND_GRAY = '#666666';
 
 interface CardBrandLogoProps {
   brand: CardBrand;
@@ -34,32 +39,32 @@ export const CardBrandLogo: React.FC<CardBrandLogoProps> = ({ brand }) => {
 
 const styles = StyleSheet.create({
   badge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 4,
-    marginLeft: 8,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs / 2,
+    borderRadius: SPACING.xs,
+    marginLeft: SPACING.sm,
   },
   visaBadge: {
-    backgroundColor: '#1A1F71',
+    backgroundColor: VISA_BACKGROUND,
   },
   mastercardBadge: {
-    backgroundColor: '#EB001B',
+    backgroundColor: MASTERCARD_BACKGROUND,
   },
   otherBadge: {
-    backgroundColor: '#666666',
+    backgroundColor: BRAND_GRAY,
   },
   text: {
-    fontSize: 10,
+    fontSize: FONT_SIZES.xs,
     fontWeight: 'bold',
     letterSpacing: 0.5,
   },
   visaText: {
-    color: '#FFFFFF',
+    color: COLORS.white,
   },
   mastercardText: {
-    color: '#FFFFFF',
+    color: COLORS.white,
   },
   otherText: {
-    color: '#FFFFFF',
+    color: COLORS.white,
   },
 });

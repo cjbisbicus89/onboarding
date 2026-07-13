@@ -23,6 +23,7 @@ import { setCustomerData } from '../../application/state/slices/customerSlice';
 import { checkoutClient } from '../../services/api/checkout-client.service';
 import { v4 as uuidv4 } from 'uuid';
 import { Toast, useToast } from '../../components/shared/toast.component';
+import { COLORS, FONT_SIZES, SPACING, BORDER_RADIUS, SIZES, SHADOWS } from '../../infrastructure/theme';
 
 const { width, height } = Dimensions.get('window');
 
@@ -39,6 +40,17 @@ interface PaymentMethodData {
 interface Props {
   navigation: CheckoutScreenNavigationProp;
 }
+
+const BACKDROP_TRANSITION_MS = 300;
+const ERROR_NAVIGATION_DELAY_MS = 2000;
+const QUANTITY_SPACING = 15;
+
+const getErrorMessage = (error: unknown): string => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return 'Error al procesar pago';
+};
 
 const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
   const dispatch = useAppDispatch();
@@ -74,13 +86,13 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
   const handleCustomerComplete = (data: { email: string; fullName: string }) => {
     dispatch(setCustomerData(data));
     setShowCustomerBackdrop(false);
-    setTimeout(() => setShowCardBackdrop(true), 300);
+    setTimeout(() => setShowCardBackdrop(true), BACKDROP_TRANSITION_MS);
   };
 
   const handleCardComplete = (data: PaymentMethodData) => {
     setPaymentMethod(data);
     setShowCardBackdrop(false);
-    setTimeout(() => setShowSummaryBackdrop(true), 300);
+    setTimeout(() => setShowSummaryBackdrop(true), BACKDROP_TRANSITION_MS);
   };
 
   const handleConfirmPayment = async () => {
@@ -161,10 +173,10 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
             transactionId: finalTransactionId,
             status: finalStatus,
           });
-        }, 2000);
+        }, ERROR_NAVIGATION_DELAY_MS);
       }
-    } catch (error: any) {
-      const msg = error.message || 'Error al procesar pago';
+    } catch (error) {
+      const msg = getErrorMessage(error);
       dispatch(checkoutFailure(msg));
       showToast(msg, 'error');
       setTimeout(() => {
@@ -174,7 +186,7 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
           transactionId: transactionId,
           status: 'ERROR',
         });
-      }, 2000);
+      }, ERROR_NAVIGATION_DELAY_MS);
     } finally {
       setIsProcessing(false);
     }
@@ -193,20 +205,20 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
           onPress={() => handleUpdateQuantity(item.productId, item.quantity - 1)}
           style={styles.qtyButton}
         >
-          <Minus size={16} color="#f4511e" />
+          <Minus size={SIZES.iconSmall} color={COLORS.primary} />
         </TouchableOpacity>
         <Text style={styles.quantity}>{item.quantity}</Text>
         <TouchableOpacity
           onPress={() => handleUpdateQuantity(item.productId, item.quantity + 1)}
           style={styles.qtyButton}
         >
-          <Plus size={16} color="#f4511e" />
+          <Plus size={SIZES.iconSmall} color={COLORS.primary} />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => dispatch(removeItem(item.productId))}
           style={styles.removeButton}
         >
-          <Trash2 size={20} color="#666" />
+          <Trash2 size={SIZES.iconBase} color={COLORS.textSecondary} />
         </TouchableOpacity>
       </View>
     </View>
@@ -216,10 +228,10 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <ArrowLeft size={24} color="#333" />
+          <ArrowLeft size={SIZES.iconLarge} color={COLORS.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Mi Carrito</Text>
-        <View style={{ width: 24 }} />
+        <View style={{ width: SIZES.headerIconSize }} />
       </View>
 
       <FlatList
@@ -243,7 +255,7 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
             </Text>
           </View>
           <TouchableOpacity style={styles.payButton} onPress={handleStartPayment}>
-            <CreditCard color="#fff" size={24} />
+            <CreditCard color={COLORS.white} size={SIZES.iconLarge} />
             <Text style={styles.payButtonText}>Pagar con tarjeta de crédito</Text>
           </TouchableOpacity>
         </View>
@@ -281,45 +293,45 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.background,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 20,
+    padding: SPACING.lg,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: COLORS.borderLight,
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: FONT_SIZES.xl,
     fontWeight: 'bold',
-    color: '#333',
+    color: COLORS.textPrimary,
   },
   listContent: {
-    padding: 20,
+    padding: SPACING.lg,
   },
   cartItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
-    paddingBottom: 20,
+    marginBottom: SPACING.lg,
+    paddingBottom: SPACING.lg,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: COLORS.borderLighter,
   },
   itemInfo: {
     flex: 1,
   },
   itemName: {
-    fontSize: 16,
+    fontSize: FONT_SIZES.base,
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 5,
+    color: COLORS.textPrimary,
+    marginBottom: SPACING.xs,
   },
   itemPrice: {
-    fontSize: 14,
-    color: '#f4511e',
+    fontSize: FONT_SIZES.md,
+    color: COLORS.primary,
     fontWeight: '600',
   },
   quantityControls: {
@@ -327,65 +339,61 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   qtyButton: {
-    padding: 5,
+    padding: SPACING.xs,
     borderWidth: 1,
-    borderColor: '#f4511e',
-    borderRadius: 5,
+    borderColor: COLORS.primary,
+    borderRadius: BORDER_RADIUS.sm,
   },
   quantity: {
-    marginHorizontal: 15,
-    fontSize: 16,
+    marginHorizontal: QUANTITY_SPACING,
+    fontSize: FONT_SIZES.base,
     fontWeight: 'bold',
   },
   removeButton: {
-    marginLeft: 15,
+    marginLeft: QUANTITY_SPACING,
   },
   footer: {
-    padding: 20,
+    padding: SPACING.lg,
     borderTopWidth: 1,
-    borderTopColor: '#eee',
-    backgroundColor: '#f9f9f9',
+    borderTopColor: COLORS.borderLight,
+    backgroundColor: COLORS.backgroundSecondary,
   },
   totalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 20,
+    marginBottom: SPACING.lg,
   },
   totalLabel: {
-    fontSize: 18,
-    color: '#666',
+    fontSize: FONT_SIZES.lg,
+    color: COLORS.textSecondary,
   },
   totalValue: {
-    fontSize: 22,
+    fontSize: FONT_SIZES.xxl,
     fontWeight: 'bold',
-    color: '#f4511e',
+    color: COLORS.primary,
   },
   payButton: {
-    backgroundColor: '#f4511e',
+    backgroundColor: COLORS.primary,
     flexDirection: 'row',
-    height: 60,
-    borderRadius: 30,
+    height: SIZES.buttonHeightLarge,
+    borderRadius: BORDER_RADIUS.xl,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
+    ...SHADOWS.subtle,
   },
   payButtonText: {
-    color: '#fff',
-    fontSize: 18,
+    color: COLORS.white,
+    fontSize: FONT_SIZES.lg,
     fontWeight: 'bold',
-    marginLeft: 10,
+    marginLeft: SPACING.sm,
   },
   emptyContainer: {
     alignItems: 'center',
-    marginTop: 50,
+    marginTop: SPACING.huge,
   },
   emptyText: {
-    fontSize: 18,
-    color: '#999',
+    fontSize: FONT_SIZES.lg,
+    color: COLORS.textMuted,
   },
 });
 

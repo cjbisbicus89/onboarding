@@ -8,6 +8,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { ShoppingBag, User, CreditCard, CheckCircle2 } from 'lucide-react-native';
+import { COLORS, FONT_SIZES, SPACING, BORDER_RADIUS, SIZES } from '../../../infrastructure/theme';
 
 const { width, height } = Dimensions.get('window');
 const responsiveWidth = (p: number) => (width * p) / 100;
@@ -43,7 +44,7 @@ export const PaymentSummaryComponent: React.FC<Props> = ({
 
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <ShoppingBag size={20} color="#f4511e" />
+          <ShoppingBag size={SIZES.iconBase} color={COLORS.primary} />
           <Text style={styles.sectionTitle}>Productos</Text>
         </View>
         {cart.items.map((item) => (
@@ -66,7 +67,7 @@ export const PaymentSummaryComponent: React.FC<Props> = ({
 
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <User size={20} color="#f4511e" />
+          <User size={SIZES.iconBase} color={COLORS.primary} />
           <Text style={styles.sectionTitle}>Cliente</Text>
         </View>
         <Text style={styles.infoText}>{customer.fullName}</Text>
@@ -75,7 +76,7 @@ export const PaymentSummaryComponent: React.FC<Props> = ({
 
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <CreditCard size={20} color="#f4511e" />
+          <CreditCard size={SIZES.iconBase} color={COLORS.primary} />
           <Text style={styles.sectionTitle}>Pago</Text>
         </View>
         {paymentMethod ? (
@@ -96,10 +97,10 @@ export const PaymentSummaryComponent: React.FC<Props> = ({
         disabled={loading}
       >
         {loading ? (
-          <ActivityIndicator color="#fff" />
+          <ActivityIndicator color={COLORS.white} />
         ) : (
           <>
-            <CheckCircle2 color="#fff" size={24} style={styles.buttonIcon} />
+            <CheckCircle2 color={COLORS.white} size={SIZES.iconLarge} style={styles.buttonIcon} />
             <Text style={styles.confirmText}>Confirmar Pago</Text>
           </>
         )}
@@ -111,88 +112,88 @@ export const PaymentSummaryComponent: React.FC<Props> = ({
 const styles = StyleSheet.create({
   container: {
     padding: responsiveWidth(5),
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.background,
   },
   title: {
     fontSize: responsiveWidth(5),
     fontWeight: 'bold',
     marginBottom: responsiveHeight(2),
-    color: '#333',
+    color: COLORS.textPrimary,
     textAlign: 'center',
   },
   section: {
-    marginBottom: 20,
+    marginBottom: SPACING.lg,
   },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: SPACING.sm,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    paddingBottom: 5,
+    borderBottomColor: COLORS.borderLight,
+    paddingBottom: SPACING.xs,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: FONT_SIZES.base,
     fontWeight: 'bold',
-    marginLeft: 10,
-    color: '#333',
+    marginLeft: SPACING.sm,
+    color: COLORS.textPrimary,
   },
   itemRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 5,
+    marginBottom: SPACING.xs,
   },
   itemName: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: FONT_SIZES.md,
+    color: COLORS.textSecondary,
     flex: 1,
   },
   itemPrice: {
-    fontSize: 14,
+    fontSize: FONT_SIZES.md,
     fontWeight: '600',
-    color: '#333',
+    color: COLORS.textPrimary,
   },
   totalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 10,
-    paddingTop: 5,
+    marginTop: SPACING.sm,
+    paddingTop: SPACING.xs,
     borderTopWidth: 1,
-    borderTopColor: '#eee',
+    borderTopColor: COLORS.borderLight,
   },
   totalLabel: {
-    fontSize: 18,
+    fontSize: FONT_SIZES.lg,
     fontWeight: 'bold',
-    color: '#333',
+    color: COLORS.textPrimary,
   },
   totalValue: {
-    fontSize: 18,
+    fontSize: FONT_SIZES.lg,
     fontWeight: 'bold',
-    color: '#f4511e',
+    color: COLORS.primary,
   },
   infoText: {
-    fontSize: 14,
-    color: '#444',
-    marginBottom: 2,
+    fontSize: FONT_SIZES.md,
+    color: COLORS.textDark,
+    marginBottom: SPACING.xs / 2,
   },
   confirmButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: COLORS.success,
     flexDirection: 'row',
     height: responsiveHeight(7),
-    borderRadius: 8,
+    borderRadius: BORDER_RADIUS.md,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: SPACING.sm,
   },
   disabledButton: {
-    backgroundColor: '#a5d6a7',
+    backgroundColor: COLORS.successLight,
   },
   buttonIcon: {
-    marginRight: 10,
+    marginRight: SPACING.sm,
   },
   confirmText: {
-    color: '#fff',
-    fontSize: 18,
+    color: COLORS.white,
+    fontSize: FONT_SIZES.lg,
     fontWeight: 'bold',
   },
 });

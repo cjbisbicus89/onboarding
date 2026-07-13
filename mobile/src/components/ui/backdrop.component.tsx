@@ -7,8 +7,15 @@ import {
   Dimensions,
   Modal,
 } from 'react-native';
+import { COLORS, BORDER_RADIUS } from '../../infrastructure/theme';
 
 const { height } = Dimensions.get('window');
+
+const BACKDROP_ANIMATION_DURATION_MS = 300;
+const BACKDROP_OVERLAY_OPACITY = 0.5;
+const BACKDROP_DISMISS_THRESHOLD = 0.3;
+const BACKDROP_HEIGHT_RATIO = 0.7;
+const BACKDROP_BORDER_RADIUS = 20;
 
 interface BackdropProps {
   visible: boolean;
@@ -29,12 +36,12 @@ export const Backdrop: React.FC<BackdropProps> = ({
       Animated.parallel([
         Animated.timing(translateY, {
           toValue: 0,
-          duration: 300,
+          duration: BACKDROP_ANIMATION_DURATION_MS,
           useNativeDriver: true,
         }),
         Animated.timing(overlayOpacity, {
-          toValue: 0.5,
-          duration: 300,
+          toValue: BACKDROP_OVERLAY_OPACITY,
+          duration: BACKDROP_ANIMATION_DURATION_MS,
           useNativeDriver: true,
         }),
       ]).start();
@@ -42,12 +49,12 @@ export const Backdrop: React.FC<BackdropProps> = ({
       Animated.parallel([
         Animated.timing(translateY, {
           toValue: height,
-          duration: 300,
+          duration: BACKDROP_ANIMATION_DURATION_MS,
           useNativeDriver: true,
         }),
         Animated.timing(overlayOpacity, {
           toValue: 0,
-          duration: 300,
+          duration: BACKDROP_ANIMATION_DURATION_MS,
           useNativeDriver: true,
         }),
       ]).start();
@@ -61,7 +68,7 @@ export const Backdrop: React.FC<BackdropProps> = ({
         translateY.setValue(gestureState.dy);
       },
       onPanResponderRelease: (_, gestureState) => {
-        if (gestureState.dy > height * 0.3) {
+        if (gestureState.dy > height * BACKDROP_DISMISS_THRESHOLD) {
           onClose();
         } else {
           Animated.spring(translateY, {
@@ -96,18 +103,18 @@ export const Backdrop: React.FC<BackdropProps> = ({
 
 const styles = StyleSheet.create({
   overlay: {
-    backgroundColor: 'black',
+    backgroundColor: COLORS.black,
   },
   backdrop: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    height: height * 0.7,
-    backgroundColor: 'white',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    shadowColor: '#000',
+    height: height * BACKDROP_HEIGHT_RATIO,
+    backgroundColor: COLORS.background,
+    borderTopLeftRadius: BACKDROP_BORDER_RADIUS,
+    borderTopRightRadius: BACKDROP_BORDER_RADIUS,
+    shadowColor: COLORS.black,
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.25,
     shadowRadius: 10,

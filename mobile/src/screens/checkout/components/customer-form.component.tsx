@@ -8,6 +8,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { User, Mail } from 'lucide-react-native';
+import { COLORS, FONT_SIZES, SPACING, BORDER_RADIUS, SIZES } from '../../../infrastructure/theme';
 
 const { width, height } = Dimensions.get('window');
 const responsiveWidth = (p: number) => (width * p) / 100;
@@ -55,7 +56,7 @@ export const CustomerFormComponent: React.FC<Props> = ({ initialData, onComplete
       <Text style={styles.title}>Datos del Cliente</Text>
       
       <View style={styles.inputContainer}>
-        <User size={20} color="#666" style={styles.icon} />
+        <User size={SIZES.iconBase} color={COLORS.textSecondary} style={styles.icon} />
         <TextInput
           style={styles.input}
           placeholder="Nombre completo"
@@ -67,7 +68,7 @@ export const CustomerFormComponent: React.FC<Props> = ({ initialData, onComplete
       {errors.fullName && <Text style={styles.errorText}>{errors.fullName}</Text>}
 
       <View style={styles.inputContainer}>
-        <Mail size={20} color="#666" style={styles.icon} />
+        <Mail size={SIZES.iconBase} color={COLORS.textSecondary} style={styles.icon} />
         <TextInput
           style={styles.input}
           placeholder="Correo electrónico"
@@ -89,50 +90,50 @@ export const CustomerFormComponent: React.FC<Props> = ({ initialData, onComplete
 const styles = StyleSheet.create({
   container: {
     padding: responsiveWidth(5),
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.background,
   },
   title: {
     fontSize: responsiveWidth(5),
     fontWeight: 'bold',
     marginBottom: responsiveHeight(2),
     textAlign: 'center',
-    color: '#333',
+    color: COLORS.textPrimary,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    marginBottom: 10,
-    paddingHorizontal: 10,
+    borderColor: COLORS.border,
+    borderRadius: BORDER_RADIUS.md,
+    marginBottom: SPACING.sm,
+    paddingHorizontal: SPACING.sm,
     height: responsiveHeight(6),
   },
   icon: {
-    marginRight: 10,
+    marginRight: SPACING.sm,
   },
   input: {
     flex: 1,
     fontSize: responsiveWidth(4),
-    color: '#333',
+    color: COLORS.textPrimary,
   },
   errorText: {
-    color: 'red',
-    fontSize: 12,
-    marginBottom: 10,
-    marginLeft: 5,
+    color: COLORS.error,
+    fontSize: FONT_SIZES.sm,
+    marginBottom: SPACING.sm,
+    marginLeft: SPACING.xs,
   },
   button: {
-    backgroundColor: '#f4511e',
+    backgroundColor: COLORS.primary,
     height: responsiveHeight(7),
-    borderRadius: 8,
+    borderRadius: BORDER_RADIUS.md,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: SPACING.lg,
   },
   buttonText: {
-    color: '#fff',
-    fontSize: 18,
+    color: COLORS.white,
+    fontSize: FONT_SIZES.lg,
     fontWeight: 'bold',
   },
 });

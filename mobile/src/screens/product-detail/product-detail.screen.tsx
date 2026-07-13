@@ -18,6 +18,7 @@ import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation.types';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ShoppingBasket, Plus, Minus } from 'lucide-react-native';
+import { COLORS, FONT_SIZES, SPACING, BORDER_RADIUS, SIZES, SHADOWS } from '../../infrastructure/theme';
 
 const { width, height } = Dimensions.get('window');
 
@@ -101,7 +102,7 @@ const ProductDetailScreen: React.FC<Props> = ({ route, navigation }) => {
               onPress={handleDecrease}
               disabled={quantity <= 1}
             >
-              <Minus size={20} color={quantity <= 1 ? '#999' : '#f4511e'} />
+              <Minus size={SIZES.iconBase} color={quantity <= 1 ? COLORS.textMuted : COLORS.primary} />
             </TouchableOpacity>
             <Text style={styles.quantityValue}>{quantity}</Text>
             <TouchableOpacity
@@ -109,7 +110,7 @@ const ProductDetailScreen: React.FC<Props> = ({ route, navigation }) => {
               onPress={handleIncrease}
               disabled={quantity >= product.stock}
             >
-              <Plus size={20} color={quantity >= product.stock ? '#999' : '#f4511e'} />
+              <Plus size={SIZES.iconBase} color={quantity >= product.stock ? COLORS.textMuted : COLORS.primary} />
             </TouchableOpacity>
           </View>
         </View>
@@ -119,7 +120,7 @@ const ProductDetailScreen: React.FC<Props> = ({ route, navigation }) => {
           onPress={handleAddToCart}
           disabled={product.stock <= 0}
         >
-          <ShoppingBasket color="#fff" size={20} />
+          <ShoppingBasket color={COLORS.white} size={SIZES.iconBase} />
           <Text style={styles.addButtonText}>Agregar al Carrito</Text>
         </TouchableOpacity>
       </View>
@@ -130,7 +131,7 @@ const ProductDetailScreen: React.FC<Props> = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.background,
   },
   center: {
     flex: 1,
@@ -140,42 +141,42 @@ const styles = StyleSheet.create({
   image: {
     width: width,
     height: height * 0.4,
-    backgroundColor: '#eee',
+    backgroundColor: COLORS.borderLight,
   },
   infoContainer: {
-    padding: 20,
+    padding: SPACING.lg,
   },
   name: {
-    fontSize: 24,
+    fontSize: FONT_SIZES.xxxl,
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 10,
+    color: COLORS.textPrimary,
+    marginBottom: SPACING.sm,
   },
   price: {
-    fontSize: 22,
-    color: '#f4511e',
+    fontSize: FONT_SIZES.xxl,
+    color: COLORS.primary,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: SPACING.xs,
   },
   stock: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 15,
+    fontSize: FONT_SIZES.md,
+    color: COLORS.textSecondary,
+    marginBottom: SPACING.md,
   },
   description: {
-    fontSize: 16,
-    color: '#444',
-    lineHeight: 24,
-    marginBottom: 20,
+    fontSize: FONT_SIZES.base,
+    color: COLORS.textDark,
+    lineHeight: FONT_SIZES.xl,
+    marginBottom: SPACING.lg,
   },
   quantityContainer: {
-    marginBottom: 20,
+    marginBottom: SPACING.lg,
   },
   quantityLabel: {
-    fontSize: 16,
+    fontSize: FONT_SIZES.base,
     fontWeight: '600',
-    color: '#333',
-    marginBottom: 10,
+    color: COLORS.textPrimary,
+    marginBottom: SPACING.sm,
   },
   quantityControls: {
     flexDirection: 'row',
@@ -185,43 +186,39 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderWidth: 1,
-    borderColor: '#f4511e',
-    borderRadius: 8,
+    borderColor: COLORS.primary,
+    borderRadius: BORDER_RADIUS.md,
     justifyContent: 'center',
     alignItems: 'center',
   },
   disabledQtyButton: {
-    borderColor: '#ddd',
+    borderColor: COLORS.border,
   },
   quantityValue: {
-    fontSize: 18,
+    fontSize: FONT_SIZES.lg,
     fontWeight: 'bold',
-    color: '#333',
-    marginHorizontal: 20,
+    color: COLORS.textPrimary,
+    marginHorizontal: SPACING.lg,
     minWidth: 30,
     textAlign: 'center',
   },
   addButton: {
-    backgroundColor: '#f4511e',
+    backgroundColor: COLORS.primary,
     flexDirection: 'row',
-    height: 56,
-    borderRadius: 28,
+    height: SIZES.buttonHeight,
+    borderRadius: BORDER_RADIUS.lg,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
+    ...SHADOWS.default,
   },
   disabledButton: {
-    backgroundColor: '#ccc',
+    backgroundColor: COLORS.disabled,
   },
   addButtonText: {
-    color: '#fff',
-    fontSize: 18,
+    color: COLORS.white,
+    fontSize: FONT_SIZES.lg,
     fontWeight: 'bold',
-    marginLeft: 10,
+    marginLeft: SPACING.sm,
   },
 });
 

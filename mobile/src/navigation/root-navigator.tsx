@@ -6,6 +6,7 @@ import HomeScreen from '../screens/home/home.screen';
 import ProductDetailScreen from '../screens/product-detail/product-detail.screen';
 import CheckoutScreen from '../screens/checkout/checkout.screen';
 import ResultScreen from '../screens/result/result.screen';
+import { COLORS } from '../infrastructure/theme';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -15,9 +16,9 @@ export const RootNavigator = () => {
       initialRouteName="Splash"
       screenOptions={{
         headerStyle: {
-          backgroundColor: '#f4511e',
+          backgroundColor: COLORS.primary,
         },
-        headerTintColor: '#fff',
+        headerTintColor: COLORS.white,
         headerTitleStyle: {
           fontWeight: 'bold',
         },
