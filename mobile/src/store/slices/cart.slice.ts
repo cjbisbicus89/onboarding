@@ -40,6 +40,10 @@ const cartSlice = createSlice({
       action: PayloadAction<Omit<CartItem, 'quantity'> & { quantity?: number }>,
     ) => {
       const { quantity: requestedQuantity = 1, ...itemPayload } = action.payload;
+      if (itemPayload.stock <= 0) {
+        return;
+      }
+
       const quantityToAdd = Math.max(1, requestedQuantity);
       const existingItem = state.items.find((item) => item.productId === itemPayload.productId);
 
@@ -48,7 +52,9 @@ const cartSlice = createSlice({
         existingItem.quantity = newQuantity;
       } else {
         const quantity = Math.min(quantityToAdd, itemPayload.stock);
-        state.items.push({ ...itemPayload, quantity });
+        if (quantity > 0) {
+          state.items.push({ ...itemPayload, quantity });
+        }
       }
       recalculateTotals(state);
     },
@@ -65,7 +71,7 @@ const cartSlice = createSlice({
         if (action.payload.quantity <= 0) {
           state.items = state.items.filter((i) => i.productId !== action.payload.productId);
         } else {
-          item.quantity = action.payload.quantity;
+          item.quantity = Math.min(action.payload.quantity, item.stock);
         }
       }
       recalculateTotals(state);

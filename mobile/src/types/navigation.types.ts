@@ -3,5 +3,5 @@ export type RootStackParamList = {
   Home: undefined;
   ProductDetail: { productId: string };
   Checkout: undefined;
-  Result: { transactionId: string; status: 'APPROVED' | 'DECLINED' | 'ERROR' };
+  Result: { transactionId: string; status: 'APPROVED' | 'DECLINED' | 'ERROR' | 'PENDING' };
 };

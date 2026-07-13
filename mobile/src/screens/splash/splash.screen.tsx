@@ -22,6 +22,17 @@ const SplashScreen: React.FC<Props> = ({ navigation }) => {
   const { currentTransactionId, isUnconfirmed } = useAppSelector((state) => state.transaction);
   const [polling, setPolling] = useState(false);
   const pollCount = useRef(0);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (isUnconfirmed && currentTransactionId) {
@@ -30,35 +41,53 @@ const SplashScreen: React.FC<Props> = ({ navigation }) => {
       return;
     }
 
-    const timer = setTimeout(() => {
-      navigation.replace('Home');
+    timerRef.current = setTimeout(() => {
+      if (isMountedRef.current) {
+        navigation.replace('Home');
+      }
     }, SPLASH_DELAY_MS);
 
-    return () => clearTimeout(timer);
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
   }, [isUnconfirmed, currentTransactionId, navigation, dispatch]);
+
+  const navigateToHome = () => {
+    if (isMountedRef.current) {
+      navigation.replace('Home');
+    }
+  };
 
   const pollTransaction = async (transactionId: string) => {
     try {
       const data = await checkoutClient.getTransaction(transactionId);
 
+      if (!isMountedRef.current) {
+        return;
+      }
+
       if (data.status === 'PENDING' && pollCount.current < MAX_POLL_ATTEMPTS) {
         pollCount.current += 1;
-        setTimeout(() => pollTransaction(transactionId), POLL_INTERVAL_MS);
+        timerRef.current = setTimeout(() => pollTransaction(transactionId), POLL_INTERVAL_MS);
       } else if (data.status === 'APPROVED') {
         dispatch(clearCart());
         dispatch(resetTransactionState());
-        navigation.replace('Home');
+        navigateToHome();
       } else if (data.status === 'DECLINED' || data.status === 'ERROR') {
         dispatch(resetTransactionState());
-        navigation.replace('Home');
+        navigateToHome();
       } else {
         // Timeout de polling: asumir timeout y restaurar carrito
         dispatch(resetTransactionState());
-        navigation.replace('Home');
+        navigateToHome();
       }
     } catch (error) {
-      dispatch(resetTransactionState());
-      navigation.replace('Home');
+      if (isMountedRef.current) {
+        dispatch(resetTransactionState());
+        navigateToHome();
+      }
     }
   };
 

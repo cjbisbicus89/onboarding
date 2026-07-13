@@ -135,7 +135,7 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
       dispatch(
         checkoutSuccess({
           transactionId: finalTransactionId,
-          status: finalStatus as any,
+          status: finalStatus,
         })
       );
 
@@ -150,6 +150,8 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
         const errorMsg =
           finalStatus === 'DECLINED'
             ? 'Transacción rechazada por el banco emisor'
+            : finalStatus === 'PENDING'
+            ? 'El pago está siendo procesado, verificaremos su estado al reiniciar la app'
             : 'Error técnico al procesar el pago';
         dispatch(checkoutFailure(errorMsg));
         showToast(errorMsg, 'error');
@@ -157,7 +159,7 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
           setShowSummaryBackdrop(false);
           navigation.navigate('Result', {
             transactionId: finalTransactionId,
-            status: finalStatus as 'DECLINED' | 'ERROR',
+            status: finalStatus,
           });
         }, 2000);
       }
@@ -166,7 +168,12 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
       dispatch(checkoutFailure(msg));
       showToast(msg, 'error');
       setTimeout(() => {
+        setShowSummaryBackdrop(false);
         setIsProcessing(false);
+        navigation.navigate('Result', {
+          transactionId: transactionId,
+          status: 'ERROR',
+        });
       }, 2000);
     } finally {
       setIsProcessing(false);

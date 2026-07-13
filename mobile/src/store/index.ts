@@ -18,45 +18,50 @@ import customerReducer, { type CustomerState } from '../application/state/slices
 import transactionReducer, { type TransactionState } from './slices/transaction.slice';
 import checkoutReducer, { type CheckoutState } from '../application/state/slices/checkoutSlice';
 
-const SECRET_KEY = 'mobile-secure-storage-key-32chars!'; // 32 bytes
+const SECRET_KEY = process.env.EXPO_PUBLIC_REDUX_SECRET_KEY;
+
+const MIN_SECRET_KEY_LENGTH = 8;
+
+if (!SECRET_KEY || SECRET_KEY.length < MIN_SECRET_KEY_LENGTH) {
+  throw new Error(
+    'EXPO_PUBLIC_REDUX_SECRET_KEY no está definida o es muy corta. Revisa tu archivo .env',
+  );
+}
+
+const createEncryptTransform = (label: string) =>
+  encryptTransform({
+    secretKey: SECRET_KEY,
+    onError: (error) => {
+      if (__DEV__) {
+        // eslint-disable-next-line no-console
+        console.error(`Error al desencriptar ${label}:`, error);
+      }
+    },
+  });
 
 const cartPersistConfig = {
   key: 'cart',
   storage: AsyncStorage,
-  transforms: [
-    encryptTransform({
-      secretKey: SECRET_KEY,
-      onError: (error) => {
-        if (__DEV__) {
-          // eslint-disable-next-line no-console
-          console.error('Error al desencriptar el carrito:', error);
-        }
-      },
-    }),
-  ],
+  transforms: [createEncryptTransform('el carrito')],
 };
 
 const transactionPersistConfig = {
   key: 'transaction',
   storage: AsyncStorage,
-  transforms: [
-    encryptTransform({
-      secretKey: SECRET_KEY,
-      onError: (error) => {
-        if (__DEV__) {
-          // eslint-disable-next-line no-console
-          console.error('Error al desencriptar la transacción:', error);
-        }
-      },
-    }),
-  ],
+  transforms: [createEncryptTransform('la transacción')],
+};
+
+const customerPersistConfig = {
+  key: 'customer',
+  storage: AsyncStorage,
+  transforms: [createEncryptTransform('los datos del cliente')],
 };
 
 export const store = configureStore({
   reducer: {
     catalog: catalogReducer,
     cart: persistReducer(cartPersistConfig, cartReducer) as Reducer<any, AnyAction>,
-    customer: customerReducer,
+    customer: persistReducer(customerPersistConfig, customerReducer) as Reducer<any, AnyAction>,
     transaction: persistReducer(transactionPersistConfig, transactionReducer) as Reducer<any, AnyAction>,
     checkout: checkoutReducer,
   },
