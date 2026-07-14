@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  Dimensions,
 } from 'react-native';
 import {
   CardValidator,
@@ -17,11 +16,8 @@ import {
 } from '../../../validators/card.validator';
 import { CardBrandLogo } from '../../../components/ui/card-brand-logo.component';
 import { CreditCard, Calendar, Lock, User } from 'lucide-react-native';
-import { COLORS, FONT_SIZES, SPACING, BORDER_RADIUS, SIZES } from '../../../infrastructure/theme';
-
-const { width, height } = Dimensions.get('window');
-const responsiveWidth = (p: number) => (width * p) / 100;
-const responsiveHeight = (p: number) => (height * p) / 100;
+import { COLORS, SIZES, useResponsiveDimensions } from '../../../infrastructure/theme';
+import { makeCardFormStyles } from './card-form.component.styles';
 
 const EXPIRY_MAX_LENGTH = 5;
 
@@ -37,6 +33,11 @@ interface Props {
 }
 
 export const CardFormComponent: React.FC<Props> = ({ onComplete, loading }) => {
+  const { width, height } = useResponsiveDimensions();
+  const styles = useMemo(
+    () => StyleSheet.create(makeCardFormStyles({ width, height })),
+    [width, height],
+  );
   const [cardNumber, setCardNumber] = useState('');
   const [expiry, setExpiry] = useState('');
   const [cvc, setCvc] = useState('');
@@ -99,7 +100,6 @@ export const CardFormComponent: React.FC<Props> = ({ onComplete, loading }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Datos de la Tarjeta</Text>
-      
       <View style={styles.inputContainer}>
         <CreditCard size={SIZES.iconBase} color={COLORS.textSecondary} style={styles.icon} />
         <TextInput
@@ -116,7 +116,7 @@ export const CardFormComponent: React.FC<Props> = ({ onComplete, loading }) => {
       {errors.cardNumber && <Text style={styles.errorText}>{errors.cardNumber}</Text>}
 
       <View style={styles.row}>
-        <View style={[styles.inputContainer, { flex: 1, marginRight: SPACING.sm }]}>
+        <View style={[styles.inputContainer, styles.halfInputContainer]}>
           <Calendar size={SIZES.iconBase} color={COLORS.textSecondary} style={styles.icon} />
           <TextInput
             style={styles.input}
@@ -128,7 +128,7 @@ export const CardFormComponent: React.FC<Props> = ({ onComplete, loading }) => {
             editable={!loading}
           />
         </View>
-        <View style={[styles.inputContainer, { flex: 1 }]}>
+        <View style={[styles.inputContainer, styles.halfInputContainerLast]}>
           <Lock size={SIZES.iconBase} color={COLORS.textSecondary} style={styles.icon} />
           <TextInput
             style={styles.input}
@@ -143,8 +143,8 @@ export const CardFormComponent: React.FC<Props> = ({ onComplete, loading }) => {
         </View>
       </View>
       <View style={styles.row}>
-        {errors.expiry && <Text style={[styles.errorText, { flex: 1 }]}>{errors.expiry}</Text>}
-        {errors.cvc && <Text style={[styles.errorText, { flex: 1 }]}>{errors.cvc}</Text>}
+        {errors.expiry && <Text style={[styles.errorText, styles.halfErrorText]}>{errors.expiry}</Text>}
+        {errors.cvc && <Text style={[styles.errorText, styles.halfErrorText]}>{errors.cvc}</Text>}
       </View>
 
       <View style={styles.inputContainer}>
@@ -175,64 +175,3 @@ export const CardFormComponent: React.FC<Props> = ({ onComplete, loading }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    padding: responsiveWidth(5),
-    backgroundColor: COLORS.background,
-  },
-  title: {
-    fontSize: responsiveWidth(5),
-    fontWeight: 'bold',
-    marginBottom: responsiveHeight(2),
-    textAlign: 'center',
-    color: COLORS.textPrimary,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: BORDER_RADIUS.md,
-    marginBottom: SPACING.sm,
-    paddingHorizontal: SPACING.sm,
-    height: responsiveHeight(6),
-  },
-  icon: {
-    marginRight: SPACING.sm,
-  },
-  input: {
-    flex: 1,
-    fontSize: responsiveWidth(4),
-    color: COLORS.textPrimary,
-  },
-  row: {
-    flexDirection: 'row',
-  },
-  brandText: {
-    fontSize: FONT_SIZES.xs,
-    fontWeight: 'bold',
-    color: COLORS.primary,
-  },
-  errorText: {
-    color: COLORS.error,
-    fontSize: FONT_SIZES.sm,
-    marginBottom: SPACING.sm,
-    marginLeft: SPACING.xs,
-  },
-  button: {
-    backgroundColor: COLORS.primary,
-    height: responsiveHeight(7),
-    borderRadius: BORDER_RADIUS.md,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: SPACING.lg,
-  },
-  disabledButton: {
-    backgroundColor: COLORS.primaryLight,
-  },
-  buttonText: {
-    color: COLORS.white,
-    fontSize: FONT_SIZES.lg,
-    fontWeight: 'bold',
-  },
-});

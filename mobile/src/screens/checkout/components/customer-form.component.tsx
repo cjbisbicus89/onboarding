@@ -1,18 +1,14 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Dimensions,
 } from 'react-native';
 import { User, Mail } from 'lucide-react-native';
-import { COLORS, FONT_SIZES, SPACING, BORDER_RADIUS, SIZES } from '../../../infrastructure/theme';
-
-const { width, height } = Dimensions.get('window');
-const responsiveWidth = (p: number) => (width * p) / 100;
-const responsiveHeight = (p: number) => (height * p) / 100;
+import { COLORS, SIZES, useResponsiveDimensions } from '../../../infrastructure/theme';
+import { makeCustomerFormStyles } from './customer-form.component.styles';
 
 interface Props {
   initialData: {
@@ -23,24 +19,26 @@ interface Props {
 }
 
 export const CustomerFormComponent: React.FC<Props> = ({ initialData, onComplete }) => {
+  const { width, height } = useResponsiveDimensions();
+  const styles = useMemo(
+    () => StyleSheet.create(makeCustomerFormStyles({ width, height })),
+    [width, height],
+  );
   const [email, setEmail] = useState(initialData.email);
   const [fullName, setFullName] = useState(initialData.fullName);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
-    
     if (!fullName.trim()) {
       newErrors.fullName = 'El nombre es obligatorio';
     }
-    
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email.trim()) {
       newErrors.email = 'El correo es obligatorio';
     } else if (!emailRegex.test(email)) {
       newErrors.email = 'Correo electrónico no válido';
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -54,7 +52,6 @@ export const CustomerFormComponent: React.FC<Props> = ({ initialData, onComplete
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Datos del Cliente</Text>
-      
       <View style={styles.inputContainer}>
         <User size={SIZES.iconBase} color={COLORS.textSecondary} style={styles.icon} />
         <TextInput
@@ -87,53 +84,3 @@ export const CustomerFormComponent: React.FC<Props> = ({ initialData, onComplete
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    padding: responsiveWidth(5),
-    backgroundColor: COLORS.background,
-  },
-  title: {
-    fontSize: responsiveWidth(5),
-    fontWeight: 'bold',
-    marginBottom: responsiveHeight(2),
-    textAlign: 'center',
-    color: COLORS.textPrimary,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: BORDER_RADIUS.md,
-    marginBottom: SPACING.sm,
-    paddingHorizontal: SPACING.sm,
-    height: responsiveHeight(6),
-  },
-  icon: {
-    marginRight: SPACING.sm,
-  },
-  input: {
-    flex: 1,
-    fontSize: responsiveWidth(4),
-    color: COLORS.textPrimary,
-  },
-  errorText: {
-    color: COLORS.error,
-    fontSize: FONT_SIZES.sm,
-    marginBottom: SPACING.sm,
-    marginLeft: SPACING.xs,
-  },
-  button: {
-    backgroundColor: COLORS.primary,
-    height: responsiveHeight(7),
-    borderRadius: BORDER_RADIUS.md,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: SPACING.lg,
-  },
-  buttonText: {
-    color: COLORS.white,
-    fontSize: FONT_SIZES.lg,
-    fontWeight: 'bold',
-  },
-});

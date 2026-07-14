@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Dimensions,
   SafeAreaView,
 } from 'react-native';
 import { useAppDispatch } from '../../store/hooks';
@@ -20,15 +19,10 @@ import {
   Home,
   RefreshCw,
 } from 'lucide-react-native';
-import { COLORS, FONT_SIZES, SPACING, BORDER_RADIUS, SHADOWS, SIZES } from '../../infrastructure/theme';
+import { COLORS, SIZES } from '../../infrastructure/theme';
+import { resultStyles } from './result.styles';
 
-const { width } = Dimensions.get('window');
-
-const ICON_MARGIN_BOTTOM = SPACING.xxl;
-const TITLE_MARGIN_BOTTOM = SPACING.md;
-const SUBTITLE_MARGIN_BOTTOM = SPACING.xxl;
-const TRANSACTION_ID_MARGIN_BOTTOM = SPACING.xxxl;
-const BUTTON_ICON_MARGIN_RIGHT = SPACING.sm;
+const styles = StyleSheet.create(resultStyles);
 
 const RESULT_STATUS = {
   APPROVED: 'APPROVED',
@@ -149,72 +143,5 @@ const ResultScreen: React.FC<Props> = ({ route }) => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: width * 0.05,
-  },
-  icon: {
-    marginBottom: ICON_MARGIN_BOTTOM,
-  },
-  title: {
-    fontSize: FONT_SIZES.title,
-    fontWeight: 'bold',
-    color: COLORS.textPrimary,
-    marginBottom: TITLE_MARGIN_BOTTOM,
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: FONT_SIZES.base,
-    color: COLORS.textSecondary,
-    textAlign: 'center',
-    marginBottom: SUBTITLE_MARGIN_BOTTOM,
-    paddingHorizontal: SPACING.lg,
-  },
-  transactionId: {
-    fontSize: FONT_SIZES.md,
-    color: COLORS.textMuted,
-    marginBottom: TRANSACTION_ID_MARGIN_BOTTOM,
-  },
-  homeButton: {
-    backgroundColor: COLORS.primary,
-    flexDirection: 'row',
-    height: SIZES.buttonHeight,
-    borderRadius: BORDER_RADIUS.lg,
-    paddingHorizontal: SPACING.xxl,
-    justifyContent: 'center',
-    alignItems: 'center',
-    ...SHADOWS.default,
-  },
-  retryButton: {
-    flexDirection: 'row',
-    height: SIZES.buttonHeight,
-    borderRadius: BORDER_RADIUS.lg,
-    paddingHorizontal: SPACING.xxl,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: SPACING.md,
-    borderWidth: 2,
-  },
-  buttonIcon: {
-    marginRight: BUTTON_ICON_MARGIN_RIGHT,
-  },
-  homeButtonText: {
-    color: COLORS.white,
-    fontSize: FONT_SIZES.lg,
-    fontWeight: 'bold',
-  },
-  retryButtonText: {
-    fontSize: FONT_SIZES.lg,
-    fontWeight: 'bold',
-  },
-});
 
 export default ResultScreen;

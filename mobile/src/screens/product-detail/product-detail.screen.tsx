@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -7,9 +7,6 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
-  Platform,
-  Dimensions,
-  SafeAreaView,
 } from 'react-native';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { addItem } from '../../store/slices/cart.slice';
@@ -19,9 +16,8 @@ import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/navigation.types';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ShoppingBasket, Plus, Minus } from 'lucide-react-native';
-import { COLORS, FONT_SIZES, SPACING, BORDER_RADIUS, SIZES, SHADOWS } from '../../infrastructure/theme';
-
-const { width, height } = Dimensions.get('window');
+import { COLORS, SIZES, useResponsiveDimensions } from '../../infrastructure/theme';
+import { makeProductDetailStyles } from './product-detail.styles';
 
 type ProductDetailScreenRouteProp = RouteProp<RootStackParamList, 'ProductDetail'>;
 type ProductDetailScreenNavigationProp = StackNavigationProp<RootStackParamList, 'ProductDetail'>;
@@ -32,6 +28,11 @@ interface Props {
 }
 
 const ProductDetailScreen: React.FC<Props> = ({ route, navigation }) => {
+  const { width, height } = useResponsiveDimensions();
+  const styles = useMemo(
+    () => StyleSheet.create(makeProductDetailStyles({ width, height })),
+    [width, height],
+  );
   const { productId } = route.params;
   const dispatch = useAppDispatch();
   const [quantity, setQuantity] = useState(1);
@@ -118,99 +119,5 @@ const ProductDetailScreen: React.FC<Props> = ({ route, navigation }) => {
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  image: {
-    width: width,
-    height: height * 0.4,
-    backgroundColor: COLORS.borderLight,
-  },
-  infoContainer: {
-    padding: SPACING.lg,
-  },
-  name: {
-    fontSize: FONT_SIZES.xxxl,
-    fontWeight: 'bold',
-    color: COLORS.textPrimary,
-    marginBottom: SPACING.sm,
-  },
-  price: {
-    fontSize: FONT_SIZES.xxl,
-    color: COLORS.primary,
-    fontWeight: 'bold',
-    marginBottom: SPACING.xs,
-  },
-  stock: {
-    fontSize: FONT_SIZES.md,
-    color: COLORS.textSecondary,
-    marginBottom: SPACING.md,
-  },
-  description: {
-    fontSize: FONT_SIZES.base,
-    color: COLORS.textDark,
-    lineHeight: FONT_SIZES.xl,
-    marginBottom: SPACING.lg,
-  },
-  quantityContainer: {
-    marginBottom: SPACING.lg,
-  },
-  quantityLabel: {
-    fontSize: FONT_SIZES.base,
-    fontWeight: '600',
-    color: COLORS.textPrimary,
-    marginBottom: SPACING.sm,
-  },
-  quantityControls: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  qtyButton: {
-    width: 40,
-    height: 40,
-    borderWidth: 1,
-    borderColor: COLORS.primary,
-    borderRadius: BORDER_RADIUS.md,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  disabledQtyButton: {
-    borderColor: COLORS.border,
-  },
-  quantityValue: {
-    fontSize: FONT_SIZES.lg,
-    fontWeight: 'bold',
-    color: COLORS.textPrimary,
-    marginHorizontal: SPACING.lg,
-    minWidth: 30,
-    textAlign: 'center',
-  },
-  addButton: {
-    backgroundColor: COLORS.primary,
-    flexDirection: 'row',
-    height: SIZES.buttonHeight,
-    borderRadius: BORDER_RADIUS.lg,
-    justifyContent: 'center',
-    alignItems: 'center',
-    ...SHADOWS.default,
-  },
-  disabledButton: {
-    backgroundColor: COLORS.disabled,
-  },
-  addButtonText: {
-    color: COLORS.white,
-    fontSize: FONT_SIZES.lg,
-    fontWeight: 'bold',
-    marginLeft: SPACING.sm,
-  },
-});
 
 export default ProductDetailScreen;

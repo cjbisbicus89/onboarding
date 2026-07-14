@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
-import { COLORS, SPACING } from '../../infrastructure/theme';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Text, StyleSheet, Animated } from 'react-native';
+import { makeToastStyles } from './toast.component.styles';
 
 export type ToastType = 'info' | 'success' | 'warning' | 'error';
 
@@ -13,7 +13,6 @@ interface ToastProps {
 
 const TOAST_DEFAULT_DURATION_MS = 4000;
 const TOAST_ANIMATION_DURATION_MS = 300;
-const TOAST_Z_INDEX = 1000;
 
 export const Toast: React.FC<ToastProps> = ({
   message,
@@ -22,6 +21,8 @@ export const Toast: React.FC<ToastProps> = ({
   onDismiss,
 }) => {
   const opacity = useState(new Animated.Value(0))[0];
+  const styles = StyleSheet.create(makeToastStyles());
+  const animatedStyle = useMemo(() => ({ opacity }), [opacity]);
 
   useEffect(() => {
     Animated.timing(opacity, {
@@ -42,7 +43,7 @@ export const Toast: React.FC<ToastProps> = ({
   }, [duration, opacity, onDismiss]);
 
   return (
-    <Animated.View style={[styles.container, styles[type], { opacity }]}>
+    <Animated.View style={[styles.container, styles[type], animatedStyle]}>
       <Text style={styles.text}>{message}</Text>
     </Animated.View>
   );
@@ -62,24 +63,3 @@ export const useToast = () => {
   return { toast, show, hide };
 };
 
-const styles = StyleSheet.create({
-  container: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: SPACING.base,
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: TOAST_Z_INDEX,
-  },
-  text: {
-    color: COLORS.white,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  info: { backgroundColor: COLORS.info },
-  success: { backgroundColor: COLORS.success },
-  warning: { backgroundColor: COLORS.warning },
-  error: { backgroundColor: COLORS.error },
-});

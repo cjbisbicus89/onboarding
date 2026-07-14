@@ -1,12 +1,20 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, SafeAreaView } from 'react-native';
+import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ActivityIndicator,
+  SafeAreaView,
+  Animated,
+} from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types/navigation.types';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { resetTransactionState } from '../../store/slices/transaction.slice';
 import { clearCart } from '../../store/slices/cart.slice';
 import { checkoutClient } from '../../services/api/checkout-client.service';
-import { COLORS, FONT_SIZES, SPACING } from '../../infrastructure/theme';
+import { COLORS, useResponsiveDimensions } from '../../infrastructure/theme';
+import { makeSplashStyles } from './splash.styles';
 
 type SplashScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Splash'>;
 
@@ -19,12 +27,31 @@ const MAX_POLL_ATTEMPTS = 10;
 const POLL_INTERVAL_MS = 3000;
 
 const SplashScreen: React.FC<Props> = ({ navigation }) => {
+  const { width } = useResponsiveDimensions();
+  const styles = useMemo(() => StyleSheet.create(makeSplashStyles({ width })), [width]);
   const dispatch = useAppDispatch();
   const { currentTransactionId, isUnconfirmed } = useAppSelector((state) => state.transaction);
   const [polling, setPolling] = useState(false);
   const pollCount = useRef(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isMountedRef = useRef(true);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.8)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        friction: 5,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [fadeAnim, scaleAnim]);
 
   useEffect(() => {
     pollCount.current = 0;
@@ -54,15 +81,15 @@ const SplashScreen: React.FC<Props> = ({ navigation }) => {
         clearTimeout(timerRef.current);
       }
     };
-  }, [isUnconfirmed, currentTransactionId, navigation, dispatch]);
+  }, [isUnconfirmed, currentTransactionId, navigation, dispatch, pollTransaction]);
 
-  const navigateToHome = () => {
+  const navigateToHome = useCallback(() => {
     if (isMountedRef.current) {
       navigation.replace('Home');
     }
-  };
+  }, [navigation]);
 
-  const pollTransaction = async (transactionId: string) => {
+  const pollTransaction = useCallback(async (transactionId: string) => {
     try {
       const data = await checkoutClient.getTransaction(transactionId);
 
@@ -91,53 +118,34 @@ const SplashScreen: React.FC<Props> = ({ navigation }) => {
         navigateToHome();
       }
     }
-  };
+  }, [dispatch, navigateToHome]);
 
-  if (polling) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.content}>
-          <ActivityIndicator size="large" color={COLORS.white} />
-          <Text style={styles.title}>Verificando estado de transacción...</Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
+  const subtitle = polling
+    ? 'Verificando estado de transacción...'
+    : 'Cargando catálogo...';
 
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.circleTop} />
+      <View style={styles.circleBottom} />
       <View style={styles.content}>
-        <Text style={styles.title}>Checkout App</Text>
-        <ActivityIndicator size="large" color={COLORS.white} />
-        <Text style={styles.subtitle}>Cargando catálogo...</Text>
+        <Animated.View
+          style={[
+            styles.logoContainer,
+            { opacity: fadeAnim, transform: [{ scale: scaleAnim }] },
+          ]}
+        >
+          <Text style={styles.logoText}>CB</Text>
+        </Animated.View>
+        <Animated.Text style={[styles.title, { opacity: fadeAnim }]}>
+          C.B Store
+        </Animated.Text>
+        <Text style={styles.tagline}>Tu tienda, tu estilo</Text>
+        <ActivityIndicator size="large" color={COLORS.white} style={styles.loader} />
+        <Text style={styles.subtitle}>{subtitle}</Text>
       </View>
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.primary,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: SPACING.lg,
-  },
-  title: {
-    fontSize: FONT_SIZES.titleLarge,
-    fontWeight: 'bold',
-    color: COLORS.white,
-    marginBottom: SPACING.lg,
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: FONT_SIZES.base,
-    color: COLORS.white,
-    marginTop: SPACING.lg,
-  },
-});
 
 export default SplashScreen;

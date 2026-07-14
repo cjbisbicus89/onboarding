@@ -7,6 +7,7 @@ import ProductDetailScreen from '../screens/product-detail/product-detail.screen
 import CheckoutScreen from '../screens/checkout/checkout.screen';
 import ResultScreen from '../screens/result/result.screen';
 import { COLORS } from '../infrastructure/theme';
+import { navigatorStyles } from './navigator.styles';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -15,13 +16,9 @@ export const RootNavigator = () => {
     <Stack.Navigator
       initialRouteName="Splash"
       screenOptions={{
-        headerStyle: {
-          backgroundColor: COLORS.primary,
-        },
+        headerStyle: navigatorStyles.header,
         headerTintColor: COLORS.white,
-        headerTitleStyle: {
-          fontWeight: 'bold',
-        },
+        headerTitleStyle: navigatorStyles.headerTitle,
       }}
     >
       <Stack.Screen
