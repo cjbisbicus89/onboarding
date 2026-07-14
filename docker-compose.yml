@@ -35,5 +35,14 @@ services:
       postgres_db:
         condition: service_healthy
 
+  mobile_builder:
+    build:
+      context: .
+      dockerfile: mobile/Dockerfile
+    container_name: mobile_builder
+    volumes:
+      - ./mobile/build:/out
+    command: sh -c "mkdir -p /out && cp /app/mobile/app-mobile.apk /out/app-mobile.apk"
+
 volumes:
   postgres_data:

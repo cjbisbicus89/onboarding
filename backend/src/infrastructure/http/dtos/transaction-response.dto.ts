@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { TransactionStatus } from '../../../domain/enums/transaction-status.enum';
-import { TransactionItemResponse } from '@shared/interfaces/transaction-item.interface';
-import { TransactionResponse } from '@shared/interfaces/transaction-response.interface';
+import { TransactionItemResponse } from '@shared/dtos/transaction-item.interface';
+import { TransactionResponse } from '@shared/dtos/transaction-response.interface';
 
 export class TransactionItemResponseDto implements TransactionItemResponse {
   @ApiProperty({
@@ -53,7 +53,7 @@ export class TransactionResponseDto implements TransactionResponse {
 
   @ApiProperty({
     description: 'Comercio/procesador asignado',
-    example: 'merchant_stagtest_...',
+    example: 'payment_provider_id_placeholder',
   })
   readonly assignedTo: string;
 

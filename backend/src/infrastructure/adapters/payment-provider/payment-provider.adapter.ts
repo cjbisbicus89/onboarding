@@ -29,6 +29,9 @@ interface AcceptanceTokenResponse {
     presigned_acceptance: {
       acceptance_token: string;
     };
+    presigned_personal_data_auth: {
+      acceptance_token: string;
+    };
   };
 }
 
@@ -113,7 +116,8 @@ export class PaymentProviderAdapter implements PaymentGatewayPort {
           },
           correlationId,
         );
-        const acceptanceToken = await this.getAcceptanceToken(correlationId);
+        const { acceptanceToken, acceptPersonalAuth } =
+          await this.getAcceptanceToken(correlationId);
         const signature = SignatureUtil.generate(
           transaction.merchantReference,
           transaction.totalAmount.toCents(),
@@ -126,6 +130,7 @@ export class PaymentProviderAdapter implements PaymentGatewayPort {
             `${this.baseUrl}/transactions`,
             {
               acceptance_token: acceptanceToken,
+              accept_personal_auth: acceptPersonalAuth,
               amount_in_cents: transaction.totalAmount.toCents(),
               currency: transaction.totalAmount.currency,
               customer_email: transaction.customer.email,
@@ -282,7 +287,9 @@ export class PaymentProviderAdapter implements PaymentGatewayPort {
     return response.data.data.id;
   }
 
-  private async getAcceptanceToken(correlationId: string): Promise<string> {
+  private async getAcceptanceToken(
+    correlationId: string,
+  ): Promise<{ acceptanceToken: string; acceptPersonalAuth: string }> {
     const response = await this.retryWithBackoff(
       async () =>
         lastValueFrom(
@@ -290,7 +297,7 @@ export class PaymentProviderAdapter implements PaymentGatewayPort {
             `${this.baseUrl}/merchants/${this.merchantId}`,
             {
               headers: {
-                Authorization: `Bearer ${this.privateKey}`,
+                Authorization: `Bearer ${this.publicKey}`,
                 [CORRELATION_ID_HEADER]: correlationId,
               },
               timeout: PAYMENT_PROVIDER_TIMEOUT_MS,
@@ -300,7 +307,11 @@ export class PaymentProviderAdapter implements PaymentGatewayPort {
       'getAcceptanceToken',
     );
 
-    return response.data.data.presigned_acceptance.acceptance_token;
+    return {
+      acceptanceToken: response.data.data.presigned_acceptance.acceptance_token,
+      acceptPersonalAuth:
+        response.data.data.presigned_personal_data_auth.acceptance_token,
+    };
   }
 
   private async retryWithBackoff<T>(

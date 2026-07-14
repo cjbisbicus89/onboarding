@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { TransactionStatus } from '../../../domain/enums/transaction-status.enum';
-import { CheckoutResponse } from '@shared/interfaces/checkout-response.interface';
+import { CheckoutResponse } from '@shared/dtos/checkout-response.interface';
 
 export class CheckoutResponseDto implements CheckoutResponse {
   @ApiProperty({
@@ -31,7 +31,7 @@ export class CheckoutResponseDto implements CheckoutResponse {
 
   @ApiProperty({
     description: 'Identificador del comercio/procesador asignado',
-    example: 'merchant_stagtest_...',
+    example: 'payment_provider_id_placeholder',
   })
   readonly assignedTo: string;
 

@@ -12,7 +12,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { CheckoutRequest } from '@shared/interfaces/checkout-request.interface';
+import { CheckoutRequest } from '@shared/dtos/checkout-request.interface';
 
 export class CheckoutItemDto {
   @ApiProperty({

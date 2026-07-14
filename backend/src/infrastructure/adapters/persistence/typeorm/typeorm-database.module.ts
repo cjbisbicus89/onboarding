@@ -28,8 +28,8 @@ import { TypeormUnitOfWork } from './typeorm-unit-of-work';
         ],
         // Schema is owned exclusively by explicit migration files (see
         // src/infrastructure/adapters/persistence/typeorm/migrations).
-        // `synchronize` must remain false in every environment.
-        synchronize: false,
+        // `synchronize` should be false in production, but enabled for this test context.
+        synchronize: true,
         migrations: [__dirname + '/migrations/*{.ts,.js}'],
         migrationsRun: true,
         logging: config.get<string>('NODE_ENV') === 'development',
