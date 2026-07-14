@@ -283,6 +283,173 @@ describe('ProcessCheckoutUseCase', () => {
       ),
     ).toBe(true);
   });
+
+  it('execute_whenPaymentIsDeclined_createsDeclinedTransactionAndDoesNotReduceStock', async () => {
+    const { useCase, productRepo, transactionRepo } = setupUseCase(
+      new StubPaymentGateway({
+        success: true,
+        providerReference: 'declined-ref',
+        status: TransactionStatus.DECLINED,
+      }),
+    );
+
+    const result = await useCase.execute(createCommand());
+
+    expect(result.status).toBe(TransactionStatus.DECLINED);
+    expect(result.errorReason).toBe('Payment declined by provider');
+    expect(result.providerReference).toBeNull();
+    const product = (await productRepo.findById(productId))!;
+    expect(product.stock).toBe(10);
+    const persisted = await transactionRepo.findById(result.id);
+    expect(persisted?.status).toBe(TransactionStatus.DECLINED);
+  });
+
+  it('execute_whenPaymentIsError_marksTransactionAsErrorAndDoesNotReduceStock', async () => {
+    const { useCase, productRepo, transactionRepo } = setupUseCase(
+      new StubPaymentGateway({
+        success: true,
+        providerReference: 'error-ref',
+        status: TransactionStatus.ERROR,
+      }),
+    );
+
+    const result = await useCase.execute(createCommand());
+
+    expect(result.status).toBe(TransactionStatus.ERROR);
+    const product = (await productRepo.findById(productId))!;
+    expect(product.stock).toBe(10);
+    const persisted = await transactionRepo.findById(result.id);
+    expect(persisted?.status).toBe(TransactionStatus.ERROR);
+  });
+
+  it('execute_whenPaymentReturnsPending_keepsTransactionPendingAndDoesNotReduceStock', async () => {
+    const { useCase, productRepo, transactionRepo } = setupUseCase(
+      new StubPaymentGateway({
+        success: true,
+        providerReference: 'pending-ref',
+        status: TransactionStatus.PENDING,
+      }),
+    );
+
+    const result = await useCase.execute(createCommand());
+
+    expect(result.status).toBe(TransactionStatus.PENDING);
+    expect(result.providerReference).toBeNull();
+    const product = (await productRepo.findById(productId))!;
+    expect(product.stock).toBe(10);
+    const persisted = await transactionRepo.findById(result.id);
+    expect(persisted?.status).toBe(TransactionStatus.PENDING);
+  });
+
+  it('execute_whenDuplicateItemsAggregateExceedsStock_throwsInsufficientStockException', async () => {
+    const { useCase, productRepo } = setupUseCase(new StubPaymentGateway());
+
+    productRepo.setProducts([createProduct(4)]);
+
+    await expect(
+      useCase.execute(
+        createCommand([
+          { productId, quantity: 2 },
+          { productId, quantity: 3 },
+        ]),
+      ),
+    ).rejects.toThrow(InsufficientStockException);
+  });
+
+  it('execute_whenProductNotFound_throwsInsufficientStockExceptionWithZeroAvailable', async () => {
+    const { useCase, productRepo } = setupUseCase(new StubPaymentGateway());
+
+    productRepo.setProducts([]);
+
+    await expect(useCase.execute(createCommand())).rejects.toThrow(
+      InsufficientStockException,
+    );
+  });
+
+  it('execute_whenCustomerAlreadyExists_reusesExistingCustomer', async () => {
+    const { productRepo, transactionRepo, auditPort } = setupUseCase(
+      new StubPaymentGateway(),
+    );
+
+    const customerRepo = new InMemoryCustomerRepository();
+    await customerRepo.save(
+      Customer.create({ email: 'customer@example.com', fullName: 'Existing' }),
+    );
+
+    const useCaseWithExisting = new ProcessCheckoutUseCase(
+      customerRepo,
+      productRepo,
+      transactionRepo,
+      new StubPaymentGateway(),
+      auditPort,
+      new StubUnitOfWork({
+        products: productRepo,
+        customers: customerRepo,
+        transactions: transactionRepo,
+      }),
+    );
+
+    const result = await useCaseWithExisting.execute(createCommand());
+
+    expect(result.customer.fullName).toBe('Existing');
+    expect(customerRepo.findByEmail('customer@example.com')).resolves.toBeTruthy();
+  });
+
+  it('execute_whenTransactionDisappearsAfterPayment_throwsDomainException', async () => {
+    const { useCase, transactionRepo, auditPort } = setupUseCase(
+      new StubPaymentGateway(),
+    );
+
+    jest
+      .spyOn(transactionRepo, 'findById')
+      .mockResolvedValueOnce(null)
+      .mockResolvedValue(null);
+
+    await expect(useCase.execute(createCommand())).rejects.toThrow('desapareció');
+
+    expect(
+      auditPort.events.some(
+        (e) => hasAction(e) && e.action === 'payment_failed',
+      ),
+    ).toBe(true);
+
+    const transactions = transactionRepo.getAll();
+    expect(transactions[0].status).toBe(TransactionStatus.PENDING);
+  });
+
+  it('execute_whenProductNotFoundDuringStockUpdate_throwsDomainException', async () => {
+    const { useCase, productRepo, auditPort } = setupUseCase(
+      new StubPaymentGateway(),
+    );
+
+    jest.spyOn(productRepo, 'findByIdWithStockLock').mockResolvedValue(null);
+
+    await expect(useCase.execute(createCommand())).rejects.toThrow(
+      'No se encontró el producto',
+    );
+
+    expect(
+      auditPort.events.some(
+        (e) => hasAction(e) && e.action === 'payment_failed',
+      ),
+    ).toBe(true);
+  });
+
+  it('execute_whenMarkTransactionAsErrorAlsoFails_safeAuditsPaymentFailed', async () => {
+    const { useCase, transactionRepo, auditPort } = setupUseCase(
+      new StubPaymentGateway(undefined, true),
+    );
+
+    jest.spyOn(transactionRepo, 'findById').mockRejectedValue(new Error('db fail'));
+
+    await expect(useCase.execute(createCommand())).rejects.toThrow('Gateway error');
+
+    expect(
+      auditPort.events.some(
+        (e) => hasAction(e) && e.action === 'payment_failed',
+      ),
+    ).toBe(true);
+  });
 });
 
 function hasAction(event: unknown): event is { action: string } {

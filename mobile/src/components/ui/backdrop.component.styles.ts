@@ -21,4 +21,4 @@ export const makeBackdropStyles = (height: number) => ({
   scrollContent: {
     flexGrow: 1,
   },
-});
+} as const);

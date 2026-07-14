@@ -2,11 +2,12 @@ module.exports = {
   preset: 'react-native',
   setupFilesAfterEnv: ['@testing-library/jest-native/extend-expect'],
   transformIgnorePatterns: [
-    'node_modules/(?!(jest-)?react-native|@react-native(-community)?|react-navigation|@react-navigation/.*|react-native-svg|immer|redux-persist|react-native-encrypted-storage|lucide-react-native|uuid)',
+    'node_modules/(?!(jest-)?react-native|@react-native(-community)?|react-navigation|@react-navigation/.*|react-native-svg|immer|redux-persist|react-native-encrypted-storage|lucide-react-native|uuid|react-redux|@reduxjs/toolkit)',
   ],
   moduleNameMapper: {
     '^@shared/(.*)$': '<rootDir>/../shared/$1',
     '^@babel/runtime/(.*)$': '<rootDir>/node_modules/@babel/runtime/$1',
+    '^lucide-react-native$': '<rootDir>/__mocks__/lucide-react-native.ts',
   },
   watchPathIgnorePatterns: [
     '<rootDir>/node_modules/',

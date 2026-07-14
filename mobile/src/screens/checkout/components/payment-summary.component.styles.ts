@@ -109,4 +109,4 @@ export const makePaymentSummaryStyles = ({ width, height }: { width: number; hei
     fontSize: FONT_SIZES.lg,
     fontWeight: 'bold',
   },
-});
+} as const);

@@ -41,4 +41,13 @@ describe('maskSensitiveData', () => {
 
     expect(result).toEqual([{ number: '***REDACTED***' }]);
   });
+
+  it('whenSensitiveValueIsNullOrUndefined_returnsValueAsIs', () => {
+    expect(maskSensitiveData({ cvc: null })).toEqual({ cvc: null });
+    expect(maskSensitiveData({ cvc: undefined })).toEqual({ cvc: undefined });
+  });
+
+  it('whenSensitiveValueIsNonString_redactsValue', () => {
+    expect(maskSensitiveData({ cvc: 123 })).toEqual({ cvc: '***REDACTED***' });
+  });
 });

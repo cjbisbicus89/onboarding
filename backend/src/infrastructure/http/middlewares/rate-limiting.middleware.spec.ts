@@ -14,11 +14,11 @@ describe('RateLimitingMiddleware', () => {
     next = jest.fn();
   });
 
-  const createRequest = (ip = '127.0.0.1'): Partial<Request> =>
+  const createRequest = (ip?: string): Partial<Request> =>
     Object.assign({}, { ip } as Partial<Request>);
 
   it('use_whenRequestsAreWithinLimit_callsNext', () => {
-    req = createRequest();
+    req = createRequest('127.0.0.1');
 
     for (let i = 0; i < 10; i++) {
       middleware.use(req as Request, res as Response, next);
@@ -56,6 +56,14 @@ describe('RateLimitingMiddleware', () => {
     );
 
     jest.restoreAllMocks();
+  });
+
+  it('use_whenIpIsMissing_usesUnknownIdentifier', () => {
+    req = createRequest(undefined);
+
+    middleware.use(req as Request, res as Response, next);
+
+    expect(next).toHaveBeenCalled();
   });
 
   it('use_whenDayLimitIsExceeded_throwsForbiddenException', () => {

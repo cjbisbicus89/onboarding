@@ -46,6 +46,11 @@ describe('cart.slice', () => {
     expect(state.itemCount).toBe(5);
   });
 
+  it('should not add item when stock is zero or less', () => {
+    const state = cartReducer(initialState, addItem({ ...mockItem, stock: 0 }));
+    expect(state.items).toHaveLength(0);
+  });
+
   it('should not exceed stock when adding items', () => {
     const state = cartReducer(initialState, addItem({ ...mockItem, quantity: 15 }));
     expect(state.items[0].quantity).toBe(10);
@@ -71,6 +76,14 @@ describe('cart.slice', () => {
     expect(state.items[0].quantity).toBe(3);
     expect(state.totalAmountCentavos).toBe(450000);
     expect(state.itemCount).toBe(3);
+  });
+
+  it('should not update quantity for an item that does not exist', () => {
+    let state = cartReducer(initialState, addItem(mockItem));
+    state = cartReducer(state, updateItemQuantity({ productId: 'missing', quantity: 5 }));
+    expect(state.items).toHaveLength(1);
+    expect(state.items[0].quantity).toBe(1);
+    expect(state.itemCount).toBe(1);
   });
 
   it('should remove item when quantity is set to 0', () => {

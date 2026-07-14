@@ -92,4 +92,4 @@ export const homeStyles = {
     fontSize: FONT_SIZES.sm,
     fontWeight: 'bold',
   },
-};
+} as const;

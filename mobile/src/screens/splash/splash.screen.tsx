@@ -35,6 +35,44 @@ const SplashScreen: React.FC<Props> = ({ navigation }) => {
   const pollCount = useRef(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isMountedRef = useRef(true);
+
+  const navigateToHome = useCallback(() => {
+    if (isMountedRef.current) {
+      navigation.replace('Home');
+    }
+  }, [navigation]);
+
+  const pollTransaction = useCallback(async (transactionId: string) => {
+    try {
+      const data = await checkoutClient.getTransaction(transactionId);
+
+      if (!isMountedRef.current) {
+        return;
+      }
+
+      if (data.status === 'PENDING' && pollCount.current < MAX_POLL_ATTEMPTS) {
+        pollCount.current += 1;
+        timerRef.current = setTimeout(() => pollTransaction(transactionId), POLL_INTERVAL_MS);
+      } else if (data.status === 'APPROVED') {
+        dispatch(clearCart());
+        dispatch(resetTransactionState());
+        navigateToHome();
+      } else if (data.status === 'DECLINED' || data.status === 'ERROR') {
+        dispatch(resetTransactionState());
+        navigateToHome();
+      } else {
+        // Timeout de polling: asumir timeout y restaurar carrito
+        dispatch(resetTransactionState());
+        navigateToHome();
+      }
+    } catch (error) {
+      if (isMountedRef.current) {
+        dispatch(resetTransactionState());
+        navigateToHome();
+      }
+    }
+  }, [dispatch, navigateToHome]);
+
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
 
@@ -82,43 +120,6 @@ const SplashScreen: React.FC<Props> = ({ navigation }) => {
       }
     };
   }, [isUnconfirmed, currentTransactionId, navigation, dispatch, pollTransaction]);
-
-  const navigateToHome = useCallback(() => {
-    if (isMountedRef.current) {
-      navigation.replace('Home');
-    }
-  }, [navigation]);
-
-  const pollTransaction = useCallback(async (transactionId: string) => {
-    try {
-      const data = await checkoutClient.getTransaction(transactionId);
-
-      if (!isMountedRef.current) {
-        return;
-      }
-
-      if (data.status === 'PENDING' && pollCount.current < MAX_POLL_ATTEMPTS) {
-        pollCount.current += 1;
-        timerRef.current = setTimeout(() => pollTransaction(transactionId), POLL_INTERVAL_MS);
-      } else if (data.status === 'APPROVED') {
-        dispatch(clearCart());
-        dispatch(resetTransactionState());
-        navigateToHome();
-      } else if (data.status === 'DECLINED' || data.status === 'ERROR') {
-        dispatch(resetTransactionState());
-        navigateToHome();
-      } else {
-        // Timeout de polling: asumir timeout y restaurar carrito
-        dispatch(resetTransactionState());
-        navigateToHome();
-      }
-    } catch (error) {
-      if (isMountedRef.current) {
-        dispatch(resetTransactionState());
-        navigateToHome();
-      }
-    }
-  }, [dispatch, navigateToHome]);
 
   const subtitle = polling
     ? 'Verificando estado de transacción...'
