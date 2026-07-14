@@ -35,7 +35,7 @@ export class CardValidator {
 
   static validateExpiry(expiry: string): ExpiryValidationResult {
     if (!expiry || expiry.length !== 5) {
-      return { isValid: false, error: 'Fecha inválida (MM/YY)' };
+      return { isValid: false, error: 'Fecha inválida. Usa el formato MM/YY' };
     }
 
     const [monthPart, yearPart] = expiry.split('/');
@@ -43,7 +43,7 @@ export class CardValidator {
     const yearShort = parseInt(yearPart, 10);
 
     if (Number.isNaN(month) || Number.isNaN(yearShort)) {
-      return { isValid: false, error: 'Fecha inválida (MM/YY)' };
+      return { isValid: false, error: 'Fecha inválida. Usa el formato MM/YY' };
     }
 
     if (month < 1 || month > 12) {
@@ -62,7 +62,7 @@ export class CardValidator {
     }
 
     if (yearShort > 99) {
-      return { isValid: false, error: 'Año inválido' };
+      return { isValid: false, error: 'Año de expiración inválido' };
     }
 
     return { isValid: true };
@@ -140,7 +140,7 @@ export class CardValidator {
       return {
         isValid: false,
         brand: this.detectCardBrand(sanitized),
-        error: 'El número de tarjeta no es válido (algoritmo Luhn)',
+        error: 'Número de tarjeta inválido',
       };
     }
 
