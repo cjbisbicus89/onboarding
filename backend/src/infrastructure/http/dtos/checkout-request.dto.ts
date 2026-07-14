@@ -56,11 +56,10 @@ export class PaymentMethodDto {
   })
   @IsString({ message: 'El número de tarjeta debe ser un texto' })
   @Length(13, 19, {
-    message: 'El número de tarjeta debe tener entre 13 y 19 caracteres',
+    message: 'El número de tarjeta debe tener entre 13 y 19 dígitos',
   })
   @Matches(/^\d{13,19}$/, {
-    message:
-      'El número de tarjeta debe contener entre 13 y 19 dígitos numéricos',
+    message: 'El número de tarjeta solo debe contener dígitos',
   })
   cardNumber: string;
 
@@ -84,7 +83,7 @@ export class PaymentMethodDto {
   })
   @IsString({ message: 'El código de seguridad debe ser un texto' })
   @Length(3, 4, {
-    message: 'El código de seguridad debe tener entre 3 y 4 caracteres',
+    message: 'El código de seguridad debe tener entre 3 y 4 dígitos',
   })
   cvc: string;
 
