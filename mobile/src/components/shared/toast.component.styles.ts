@@ -22,4 +22,4 @@ export const makeToastStyles = () => ({
   success: { backgroundColor: COLORS.success },
   warning: { backgroundColor: COLORS.warning },
   error: { backgroundColor: COLORS.error },
-});
+} as const);

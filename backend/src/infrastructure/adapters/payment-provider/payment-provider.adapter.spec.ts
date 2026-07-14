@@ -6,6 +6,8 @@ import { of, throwError } from 'rxjs';
 import { Transaction } from '../../../domain/entities/transaction.entity';
 import { Customer } from '../../../domain/entities/customer.entity';
 import { TransactionItem } from '../../../domain/entities/transaction-item.entity';
+import { PaymentGatewayTimeoutException } from '../../../domain/exceptions/payment-gateway-timeout.exception';
+import { PaymentGatewayUnavailableException } from '../../../domain/exceptions/payment-gateway-unavailable.exception';
 import { MoneyVO } from '../../../domain/value-objects/money.vo';
 import { CircuitBreakerService } from '../../circuit-breaker/circuit-breaker.service';
 import { StructuredLogger } from '../../logging/structured-logger.service';
@@ -58,6 +60,7 @@ describe('PaymentProviderAdapter', () => {
         data: {
           data: {
             presigned_acceptance: { acceptance_token: 'accept-token' },
+            presigned_personal_data_auth: { acceptance_token: 'personal-token' },
           },
         },
       }),
@@ -149,5 +152,136 @@ describe('PaymentProviderAdapter', () => {
         holderName: 'John Doe',
       }),
     ).rejects.toThrow('Bad request');
+  });
+
+  it('processPayment_whenProviderReturnsPending_pollsAndReturnsApproved', async () => {
+    jest.spyOn(PaymentProviderAdapter.prototype, 'sleep' as any).mockResolvedValue(undefined);
+
+    httpService.post.mockImplementation((url: string) => {
+      if (url.includes('/tokens/cards')) {
+        return of({ data: { data: { id: 'token-123' } } });
+      }
+      if (url.includes('/transactions')) {
+        return of({ data: { data: { id: 'tx-789', status: 'PENDING' } } });
+      }
+      return throwError(() => new Error('Unknown POST'));
+    });
+
+    httpService.get.mockImplementation((url: string) => {
+      if (url.includes('/transactions/')) {
+        return of({ data: { data: { id: 'tx-789', status: 'APPROVED' } } });
+      }
+      return of({
+        data: {
+          data: {
+            presigned_acceptance: { acceptance_token: 'accept-token' },
+            presigned_personal_data_auth: { acceptance_token: 'personal-token' },
+          },
+        },
+      });
+    });
+
+    const result = await adapter.processPayment(createTransaction(), {
+      cardNumber: '4111111111111111',
+      cvc: '123',
+      expMonth: '12',
+      expYear: '2027',
+      holderName: 'John Doe',
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.status).toBe('APPROVED');
+    expect(result.providerReference).toBe('tx-789');
+  });
+
+  it('processPayment_whenProviderReturnsUnknownStatus_returnsErrorStatus', async () => {
+    httpService.post.mockImplementation((url: string) => {
+      if (url.includes('/tokens/cards')) {
+        return of({ data: { data: { id: 'token-123' } } });
+      }
+      if (url.includes('/transactions')) {
+        return of({ data: { data: { id: 'tx-999', status: 'UNKNOWN' } } });
+      }
+      return throwError(() => new Error('Unknown POST'));
+    });
+
+    const result = await adapter.processPayment(createTransaction(), {
+      cardNumber: '4111111111111111',
+      cvc: '123',
+      expMonth: '12',
+      expYear: '2027',
+      holderName: 'John Doe',
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.status).toBe('ERROR');
+  });
+
+  it('processPayment_whenTokenizeTimesOutAfterRetries_throwsPaymentGatewayTimeoutException', async () => {
+    const error = new AxiosError('timeout');
+    error.code = 'ECONNABORTED';
+
+    httpService.post.mockImplementation((url: string) => {
+      if (url.includes('/tokens/cards')) {
+        return throwError(() => error);
+      }
+      return throwError(() => new Error('Unknown POST'));
+    });
+
+    await expect(
+      adapter.processPayment(createTransaction(), {
+        cardNumber: '4111111111111111',
+        cvc: '123',
+        expMonth: '12',
+        expYear: '2027',
+        holderName: 'John Doe',
+      }),
+    ).rejects.toThrow(PaymentGatewayTimeoutException);
+  });
+
+  it('processPayment_whenTokenizeReturnsServerErrorAfterRetries_throwsPaymentGatewayUnavailableException', async () => {
+    const error = new AxiosError('server error');
+    error.response = { status: 500 } as never;
+
+    httpService.post.mockImplementation((url: string) => {
+      if (url.includes('/tokens/cards')) {
+        return throwError(() => error);
+      }
+      return throwError(() => new Error('Unknown POST'));
+    });
+
+    await expect(
+      adapter.processPayment(createTransaction(), {
+        cardNumber: '4111111111111111',
+        cvc: '123',
+        expMonth: '12',
+        expYear: '2027',
+        holderName: 'John Doe',
+      }),
+    ).rejects.toThrow(PaymentGatewayUnavailableException);
+  });
+
+  it('processPayment_whenTokenizeRetriesAndSucceeds_returnsApproved', async () => {
+    jest.spyOn(PaymentProviderAdapter.prototype, 'sleep' as any).mockResolvedValue(undefined);
+
+    const error = new AxiosError('server error');
+    error.response = { status: 503 } as never;
+
+    httpService.post
+      .mockReturnValueOnce(throwError(() => error))
+      .mockReturnValueOnce(of({ data: { data: { id: 'token-123' } } }))
+      .mockReturnValueOnce(of({ data: { data: { id: 'tx-123', status: 'APPROVED' } } }));
+
+    const result = await adapter.processPayment(createTransaction(), {
+      cardNumber: '4111111111111111',
+      cvc: '123',
+      expMonth: '12',
+      expYear: '27',
+      holderName: 'John Doe',
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.status).toBe('APPROVED');
+    expect(httpService.post).toHaveBeenCalledTimes(3);
   });
 });

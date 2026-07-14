@@ -28,6 +28,8 @@ describe('CircuitBreakerService', () => {
 
   it('execute_whenCircuitRecovers_allowsRequestsAgain', async () => {
     const service = new CircuitBreakerService();
+    let now = Date.now();
+    jest.spyOn(Date, 'now').mockImplementation(() => now);
 
     for (let i = 0; i < 5; i++) {
       await expect(
@@ -37,8 +39,10 @@ describe('CircuitBreakerService', () => {
       ).rejects.toThrow('failure');
     }
 
-    await expect(service.execute(async () => 'ok')).rejects.toThrow(
-      PaymentGatewayUnavailableException,
-    );
+    now += 60_001;
+
+    const result = await service.execute(async () => 'ok');
+
+    expect(result).toBe('ok');
   });
 });

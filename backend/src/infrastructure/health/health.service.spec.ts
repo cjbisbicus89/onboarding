@@ -2,6 +2,7 @@ import { Test } from '@nestjs/testing';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { of, throwError } from 'rxjs';
+import { writeFile } from 'fs/promises';
 import { HealthService } from './health.service';
 
 jest.mock('typeorm', () => ({
@@ -72,5 +73,16 @@ describe('HealthService', () => {
     const result = await service.check();
 
     expect(result.status).toBe('DEGRADED');
+  });
+
+  it('check_whenStorageIsDown_returnsDown', async () => {
+    (writeFile as jest.Mock).mockRejectedValue(new Error('write error'));
+    dataSource.query.mockResolvedValue([{ now: new Date() }]);
+    httpService.get.mockReturnValue(of({ data: {} }));
+
+    const result = await service.check();
+
+    expect(result.status).toBe('DOWN');
+    expect(result.services.storage.status).toBe('DOWN');
   });
 });

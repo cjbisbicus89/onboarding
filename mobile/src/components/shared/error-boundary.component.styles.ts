@@ -19,4 +19,4 @@ export const makeErrorBoundaryStyles = () => ({
     marginBottom: SPACING.lg,
     textAlign: 'center',
   },
-});
+} as const);

@@ -110,4 +110,4 @@ export const checkoutStyles = {
     fontSize: FONT_SIZES.lg,
     color: COLORS.textMuted,
   },
-};
+} as const;

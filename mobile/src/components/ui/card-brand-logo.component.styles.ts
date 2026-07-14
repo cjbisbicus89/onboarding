@@ -32,4 +32,4 @@ export const makeCardBrandLogoStyles = () => ({
   otherText: {
     color: COLORS.white,
   },
-});
+} as const);

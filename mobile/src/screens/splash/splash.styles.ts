@@ -78,5 +78,5 @@ export const makeSplashStyles = ({ width }: { width: number }) => {
       opacity: 0.9,
       marginTop: SPACING.md,
     },
-  };
+  } as const;
 };

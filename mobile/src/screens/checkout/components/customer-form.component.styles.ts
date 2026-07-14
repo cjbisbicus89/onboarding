@@ -56,4 +56,4 @@ export const makeCustomerFormStyles = ({ width, height }: { width: number; heigh
     fontSize: FONT_SIZES.lg,
     fontWeight: 'bold',
   },
-});
+} as const);

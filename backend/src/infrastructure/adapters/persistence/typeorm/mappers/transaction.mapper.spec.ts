@@ -80,4 +80,18 @@ describe('TransactionMapper', () => {
     expect(orm.customerId).toBe(transaction.customer.id);
     expect(orm.items).toHaveLength(1);
   });
+
+  it('toDomain_whenRelationsAreMissing_throwsDomainException', () => {
+    const orm = createOrm();
+    orm.customer = undefined as any;
+
+    expect(() => TransactionMapper.toDomain(orm)).toThrow('Se deben cargar las relaciones de la transacción');
+  });
+
+  it('toDomain_whenStatusIsInvalid_throwsDomainException', () => {
+    const orm = createOrm();
+    orm.status = 'INVALID';
+
+    expect(() => TransactionMapper.toDomain(orm)).toThrow('Estado de transacción inválido');
+  });
 });

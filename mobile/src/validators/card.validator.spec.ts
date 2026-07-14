@@ -64,6 +64,26 @@ describe('CardValidator', () => {
     });
   });
 
+  describe('assert', () => {
+    it('does not throw when card is valid', () => {
+      expect(() => CardValidator.assert('4242424242424242')).not.toThrow();
+    });
+
+    it('throws when card is invalid', () => {
+      expect(() => CardValidator.assert('4242424242424243')).toThrow();
+    });
+
+    it('throws when brand does not match', () => {
+      expect(() => CardValidator.assert('4242424242424242', CardBrand.MASTERCARD)).toThrow(
+        'La tarjeta no parece ser MASTERCARD',
+      );
+    });
+
+    it('does not throw when brand is UNKNOWN', () => {
+      expect(() => CardValidator.assert('4242424242424242', CardBrand.UNKNOWN)).not.toThrow();
+    });
+  });
+
   describe('isValidCvc', () => {
     it('accepts 3-digit CVC', () => {
       expect(CardValidator.isValidCvc('123')).toBe(true);

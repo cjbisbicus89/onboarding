@@ -95,4 +95,4 @@ export const makeProductDetailStyles = ({ width, height }: { width: number; heig
     fontWeight: 'bold',
     marginLeft: SPACING.sm,
   },
-});
+} as const);

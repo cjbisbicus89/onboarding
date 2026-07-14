@@ -1,4 +1,4 @@
-import { COLORS, SPACING, BORDER_RADIUS } from '../../../infrastructure/theme';
+import { COLORS, FONT_SIZES, SPACING, BORDER_RADIUS } from '../../../infrastructure/theme';
 
 const HORIZONTAL_PADDING_RATIO = 0.05;
 const TITLE_FONT_SIZE_RATIO = 0.05;
@@ -72,4 +72,4 @@ export const makeCardFormStyles = ({ width, height }: { width: number; height: n
     fontSize: FONT_SIZES.lg,
     fontWeight: 'bold',
   },
-});
+} as const);

@@ -65,4 +65,4 @@ export const resultStyles = {
     fontSize: FONT_SIZES.lg,
     fontWeight: 'bold',
   },
-};
+} as const;

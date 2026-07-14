@@ -35,7 +35,7 @@ export interface TransactionResponse {
   items: Array<{ productId: string; quantity: number; unitPriceCentavos: number }>;
 }
 
-class CheckoutClientService {
+export class CheckoutClientService {
   private readonly client: AxiosInstance;
 
   constructor() {
