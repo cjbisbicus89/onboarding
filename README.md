@@ -12,14 +12,24 @@ Aplicación móvil de checkout con pagos con tarjeta de crédito, construida con
 
 ## Requisitos previos
 
-- Node.js 18+
-- Docker y Docker Compose
-- Android SDK (si vas a usar emulador o celular físico)
-- Git
+- [Node.js 18+](https://nodejs.org/en/download)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (incluye Docker y Docker Compose)
+- [Android Studio](https://developer.android.com/studio) (incluye Android SDK y emulador; recomendado para crear el AVD)
+- [Git](https://git-scm.com/downloads)
+- [JDK 17 de Temurin (Adoptium)](https://adoptium.net/es/temurin/releases/?version=17) (requerido por Android y Gradle)
+- [Android SDK command line tools](https://developer.android.com/studio#command-tools) (alternativa si no instalas Android Studio completo)
 
 ## Cómo levantar todo el proyecto
 
-El proyecto incluye un **comando único** que levanta la base de datos, el backend, abre Swagger e intenta instalar la app en un dispositivo Android:
+1. Instala las dependencias de los proyectos:
+
+```bash
+npm install
+cd backend && npm install
+cd ../mobile && npm install
+```
+
+2. Ejecuta el comando único que levanta la base de datos, el backend, abre Swagger e intenta instalar la app en un dispositivo Android:
 
 ```bash
 npm run dev:all
@@ -27,11 +37,18 @@ npm run dev:all
 
 Este comando hace lo siguiente:
 
-1. Levanta PostgreSQL y el backend en Docker.
-2. Espera a que el backend responda correctamente (`/health`).
-3. Abre Swagger en el navegador: `http://localhost:3000/api-docs`.
-4. Configura los puentes de red ADB para dispositivos Android.
-5. Instala y lanza la app en el emulador o celular físico disponible.
+1. **Libera los puertos 3000, 5432, 8081 y 8082** si estaban ocupados por procesos locales anteriores.
+2. Levanta PostgreSQL, el backend y pgweb en Docker.
+3. Espera a que el backend responda correctamente (`/health`).
+4. Abre Swagger y pgweb en el navegador.
+5. Si detecta un celular o emulador Android, configura los puentes ADB e instala/arranca la app.
+6. Si **no detecta** ningún dispositivo, **construye la APK automaticamente** con `mobile_builder` y espera unos segundos por si conectas un dispositivo para instalarla.
+
+### Requisitos previos para el comando único
+
+- **Docker Desktop debe estar abierto y corriendo** en tu equipo antes de ejecutar `npm run dev:all`.
+- El backend y la base de datos PostgreSQL se ejecutan dentro de contenedores Docker.
+- El script intenta cerrar automáticamente procesos que ocupen los puertos `3000`, `5432`, `8081` y `8082` para evitar conflictos. Si no puede cerrarlos, se mostrará un aviso y podrás liberarlos manualmente.
 
 ### Tiempo estimado
 
@@ -64,7 +81,7 @@ La app se instalará y abrirá automáticamente en el emulador.
 npm run dev:all
 ```
 
-> Si tu celular no es detectado por ADB, también puedes instalar la APK manualmente copiando el archivo `mobile/build/app-mobile.apk` al celular.
+> Si tu celular no es detectado por ADB, `npm run dev:all` generará la APK en `mobile/build/app-mobile.apk` para que puedas instalarla. También puedes generarla manualmente con:
 
 ## Cómo generar la APK
 
@@ -72,7 +89,7 @@ npm run dev:all
 docker-compose up mobile_builder
 ```
 
-El APK se generará en:
+`npm run dev:all` también genera la APK automaticamente si no detecta un dispositivo Android. El APK se deja en:
 
 ```text
 mobile/build/app-mobile.apk
@@ -98,6 +115,17 @@ npm run test:mobile
 npm run test:all
 ```
 
+### Cobertura de pruebas
+
+El proyecto mantiene cobertura de pruebas unitarias superior al 80% en ambos proyectos:
+
+| Proyecto | Stmts | Branch | Funcs | Lines |
+|---|---|---|---|---|
+| Backend | 97.8% | 93.52% | 91.34% | 98.1% |
+| Mobile | 95.24% | 86.82% | 92.94% | 95.35% |
+
+*Resultados obtenidos con `npm run test:all`.*
+
 ## Documentación de la API
 
 Una vez el backend esté arriba, accede a Swagger en:
@@ -105,6 +133,24 @@ Una vez el backend esté arriba, accede a Swagger en:
 ```text
 http://localhost:3000/api-docs
 ```
+
+## Base de datos
+
+`npm run dev:all` levanta automáticamente **pgweb** (interfaz web para PostgreSQL) en:
+
+```text
+http://localhost:8082
+```
+
+Ahí puedes explorar las tablas y registros sin escribir credenciales. Si prefieres conectarte manualmente, los datos son:
+
+| Campo | Valor |
+|---|---|
+| Host | `localhost` |
+| Puerto | `5432` |
+| Usuario | `postgres` |
+| Contraseña | `postgres_secure_password_2026` |
+| Base de datos | `ecommerce_db` |
 
 ## Tarjetas de prueba para pagos
 
