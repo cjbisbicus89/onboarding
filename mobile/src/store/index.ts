@@ -12,9 +12,9 @@ import {
 } from 'redux-persist';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import catalogReducer, { type CatalogState } from '../application/state/slices/catalogSlice';
-import cartReducer, { type CartState } from './slices/cart.slice';
+import cartReducer, { type CartState } from '../application/state/slices/cartSlice';
 import customerReducer, { type CustomerState } from '../application/state/slices/customerSlice';
-import transactionReducer, { type TransactionState } from './slices/transaction.slice';
+import transactionReducer, { type TransactionState } from '../application/state/slices/transactionSlice';
 import checkoutReducer, { type CheckoutState } from '../application/state/slices/checkoutSlice';
 
 const cartPersistConfig = {

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -15,10 +15,8 @@ import { addItem } from '../../store/slices/cart.slice';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types/navigation.types';
 import { ShoppingCart } from 'lucide-react-native';
-import { COLORS, SIZES } from '../../infrastructure/theme';
-import { homeStyles } from './home.styles';
-
-const styles = StyleSheet.create(homeStyles);
+import { COLORS, useResponsiveDimensions } from '../../infrastructure/theme';
+import { makeHomeStyles } from './home.styles';
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -30,6 +28,8 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const dispatch = useAppDispatch();
   const { products, loading, error } = useAppSelector((state) => state.catalog);
   const cartItemsCount = useAppSelector((state) => state.cart.itemCount);
+  const { width, height } = useResponsiveDimensions();
+  const styles = useMemo(() => StyleSheet.create(makeHomeStyles({ width, height })), [width, height]);
 
   useEffect(() => {
     dispatch(fetchProducts());
@@ -83,7 +83,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         style={styles.cartButton}
         onPress={() => navigation.navigate('Checkout')}
       >
-        <ShoppingCart color={COLORS.white} size={SIZES.iconLarge} />
+        <ShoppingCart color={COLORS.white} size={width * 0.06} />
         {cartItemsCount > 0 && (
           <View style={styles.cartBadge}>
             <Text style={styles.cartBadgeText}>{cartItemsCount}</Text>

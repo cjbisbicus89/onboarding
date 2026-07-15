@@ -73,4 +73,20 @@ export class Product {
       this._stock - quantity,
     );
   }
+
+  increaseStock(quantity: number): Product {
+    if (!Number.isInteger(quantity) || quantity <= 0) {
+      throw new DomainException(
+        'La cantidad a restaurar debe ser un número entero positivo',
+      );
+    }
+    return new Product(
+      this.id,
+      this.name,
+      this.description,
+      this.imageUrl,
+      this.price,
+      this._stock + quantity,
+    );
+  }
 }

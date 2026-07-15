@@ -35,6 +35,19 @@ services:
       postgres_db:
         condition: service_healthy
 
+  pgweb:
+    image: sosedoff/pgweb:latest
+    container_name: ecom_pgweb
+    ports:
+      - '8082:8082'
+    command: >
+      pgweb
+      --url=postgresql://postgres:postgres_secure_password_2026@postgres_db:5432/ecommerce_db?sslmode=disable
+      --bind=0.0.0.0
+      --listen=8082
+    depends_on:
+      - postgres_db
+
   mobile_builder:
     build:
       context: .

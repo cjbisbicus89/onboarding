@@ -79,7 +79,6 @@ describe('transaction.slice', () => {
 
     beforeEach(() => {
       (checkoutClient.checkout as jest.Mock).mockReset();
-      (checkoutClient.pollTransactionStatus as jest.Mock).mockReset();
       store = configureStore({
         reducer: {
           transaction: transactionReducer,
@@ -127,18 +126,10 @@ describe('transaction.slice', () => {
       expect(state.cart.items).toHaveLength(0);
     });
 
-    it('whenPendingThenApproved_pollsAndDispatchesSuccess', async () => {
+    it('whenPending_dispatchesPendingAndDoesNotClearCart', async () => {
       (checkoutClient.checkout as jest.Mock).mockResolvedValue({
         transactionId: 'tx-1',
         status: 'PENDING',
-        totalAmountCentavos: 1000,
-        currency: 'COP',
-        assignedTo: 'a@b.com',
-        timestamp: new Date().toISOString(),
-      });
-      (checkoutClient.pollTransactionStatus as jest.Mock).mockResolvedValue({
-        transactionId: 'tx-1',
-        status: 'APPROVED',
         totalAmountCentavos: 1000,
         currency: 'COP',
         assignedTo: 'a@b.com',
@@ -157,42 +148,6 @@ describe('transaction.slice', () => {
           holderName: 'A B',
         },
       }));
-
-      const state = store.getState() as any;
-      expect(state.transaction.status).toBe('APPROVED');
-      expect(checkoutClient.pollTransactionStatus).toHaveBeenCalledWith('tx-1');
-    });
-
-    it('whenPendingAndStillPending_afterPollDoesNotClearCart', async () => {
-      (checkoutClient.checkout as jest.Mock).mockResolvedValue({
-        transactionId: 'tx-1',
-        status: 'PENDING',
-        totalAmountCentavos: 1000,
-        currency: 'COP',
-        assignedTo: 'a@b.com',
-        timestamp: new Date().toISOString(),
-      });
-      (checkoutClient.pollTransactionStatus as jest.Mock).mockResolvedValue({
-        transactionId: 'tx-1',
-        status: 'PENDING',
-        totalAmountCentavos: 1000,
-        currency: 'COP',
-        assignedTo: 'a@b.com',
-        timestamp: new Date().toISOString(),
-      });
-
-      await (store.dispatch(processCheckout({
-        localTransactionId: 'local-1',
-        items: [{ productId: 'prod-1', quantity: 1 }],
-        customer: { email: 'a@b.com', fullName: 'A B' },
-        paymentMethod: {
-          cardNumber: '4242424242424242',
-          expMonth: '12',
-          expYear: '30',
-          cvc: '123',
-          holderName: 'A B',
-        },
-      }) as any));
 
       const state = store.getState() as any;
       expect(state.transaction.status).toBe('PENDING');

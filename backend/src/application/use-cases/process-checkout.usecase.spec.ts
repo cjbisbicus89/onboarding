@@ -77,6 +77,27 @@ class InMemoryProductRepository implements ProductRepositoryPort {
       }
     }
   }
+
+  async restoreStockInTransaction(
+    updates: Array<{ productId: string; newStock: number }>,
+  ): Promise<void> {
+    for (const update of updates) {
+      const product = this.products.get(update.productId);
+      if (product) {
+        this.products.set(
+          update.productId,
+          Product.create({
+            id: product.id,
+            name: product.name,
+            description: product.description,
+            imageUrl: product.imageUrl,
+            price: product.price,
+            stock: update.newStock,
+          }),
+        );
+      }
+    }
+  }
 }
 
 class InMemoryTransactionRepository implements TransactionRepositoryPort {

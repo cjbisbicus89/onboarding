@@ -28,6 +28,8 @@ class InMemoryProductRepository implements ProductRepositoryPort {
   }
 
   async updateStockInTransaction(): Promise<void> {}
+
+  async restoreStockInTransaction(): Promise<void> {}
 }
 
 describe('FindAllProductsUseCase', () => {

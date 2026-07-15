@@ -53,17 +53,44 @@ export class ProcessCheckoutUseCase {
       cvc: command.card.cvc,
     });
     const customer = await this.resolveCustomer(command);
-    const transaction = await this.createAndSavePendingTransaction(
-      command,
-      customer,
-      products,
-    );
+
+    let transaction: Transaction;
+    let reservedUpdates: Array<{
+      productId: string;
+      oldStock: number;
+      newStock: number;
+    }> = [];
+    try {
+      const result = await this.createTransactionAndReserveStock(
+        command,
+        customer,
+        products,
+      );
+      transaction = result.transaction;
+      reservedUpdates = result.reservedUpdates;
+    } catch (error) {
+      await this.auditPort.logPaymentFailed(
+        command.idempotencyKey,
+        command.correlationId,
+        `Failed to reserve stock for checkout: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      throw error;
+    }
 
     await this.auditPort.logTransactionCreated(
       transaction.id,
       command.correlationId,
       { items: command.items.length },
     );
+
+    for (const update of reservedUpdates) {
+      await this.auditPort.logStockUpdated(
+        update.productId,
+        command.correlationId,
+        update.oldStock,
+        update.newStock,
+      );
+    }
 
     let paymentResult: {
       success: boolean;
@@ -86,6 +113,15 @@ export class ProcessCheckoutUseCase {
           ? error.message
           : 'Unknown payment gateway error',
       );
+      await this.restoreReservedStock(
+        transaction.items,
+        command.correlationId,
+      ).catch(async (restoreError: unknown) => {
+        await this.safeAuditPaymentFailed(
+          transaction.id,
+          `Failed to restore reserved stock: ${restoreError instanceof Error ? restoreError.message : 'Unknown error'}`,
+        );
+      });
       await this.markTransactionAsError(
         transaction.id,
         error instanceof Error
@@ -97,7 +133,7 @@ export class ProcessCheckoutUseCase {
 
     let persistedTransaction: Transaction;
     let previousStatus: TransactionStatus;
-    let stockUpdates: Array<{
+    let restoreUpdates: Array<{
       productId: string;
       oldStock: number;
       newStock: number;
@@ -126,7 +162,7 @@ export class ProcessCheckoutUseCase {
 
         const persisted = await repos.transactions.save(latest);
 
-        if (persisted.status === TransactionStatus.APPROVED) {
+        if (persisted.status !== TransactionStatus.APPROVED) {
           const updates = await Promise.all(
             persisted.items.map(async (item) => {
               const product = await repos.products.findByIdWithStockLock(
@@ -134,11 +170,11 @@ export class ProcessCheckoutUseCase {
               );
               if (!product) {
                 throw new DomainException(
-                  `No se encontró el producto ${item.productId} durante la actualización de stock`,
+                  `No se encontró el producto ${item.productId} durante la restauración de stock`,
                 );
               }
               const oldStock = product.stock;
-              const updatedProduct = product.decreaseStock(item.quantity);
+              const updatedProduct = product.increaseStock(item.quantity);
               return {
                 productId: item.productId,
                 oldStock,
@@ -146,8 +182,8 @@ export class ProcessCheckoutUseCase {
               };
             }),
           );
-          await repos.products.updateStockInTransaction(updates);
-          stockUpdates = updates;
+          await repos.products.restoreStockInTransaction(updates);
+          restoreUpdates = updates;
         }
 
         return { persisted, previousStatus };
@@ -156,7 +192,7 @@ export class ProcessCheckoutUseCase {
       persistedTransaction = result.persisted;
       previousStatus = result.previousStatus;
 
-      for (const update of stockUpdates) {
+      for (const update of restoreUpdates) {
         await this.auditPort.logStockUpdated(
           update.productId,
           command.correlationId,
@@ -170,6 +206,17 @@ export class ProcessCheckoutUseCase {
         command.correlationId,
         `Post-payment processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
+      if (paymentResult.status !== TransactionStatus.APPROVED) {
+        await this.restoreReservedStock(
+          transaction.items,
+          command.correlationId,
+        ).catch(async (restoreError: unknown) => {
+          await this.safeAuditPaymentFailed(
+            transaction.id,
+            `Failed to restore reserved stock: ${restoreError instanceof Error ? restoreError.message : 'Unknown error'}`,
+          );
+        });
+      }
       await this.markTransactionAsError(
         transaction.id,
         `Payment was ${paymentResult.status} but post-processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -177,13 +224,15 @@ export class ProcessCheckoutUseCase {
       throw error;
     }
 
-    await this.auditPort.logStatusChanged(
-      persistedTransaction.id,
-      command.correlationId,
-      previousStatus,
-      persistedTransaction.status,
-      'payment-provider',
-    );
+    if (previousStatus !== persistedTransaction.status) {
+      await this.auditPort.logStatusChanged(
+        persistedTransaction.id,
+        command.correlationId,
+        previousStatus,
+        persistedTransaction.status,
+        'payment-provider',
+      );
+    }
 
     return persistedTransaction;
   }
@@ -237,32 +286,99 @@ export class ProcessCheckoutUseCase {
     return this.customerRepository.save(newCustomer);
   }
 
-  private async createAndSavePendingTransaction(
+  private async createTransactionAndReserveStock(
     command: ProcessCheckoutCommand,
     customer: Customer,
     products: Map<string, Product>,
-  ): Promise<Transaction> {
-    const transactionItems = command.items.map((item) => {
-      const product = products.get(item.productId);
-      if (!product) {
-        throw new DomainException(
-          `No se encontró el producto ${item.productId} al crear la transacción`,
+  ): Promise<{
+    transaction: Transaction;
+    reservedUpdates: Array<{ productId: string; oldStock: number; newStock: number }>;
+  }> {
+    return this.unitOfWork.runInTransaction(async (repos) => {
+      const transactionItems = command.items.map((item) => {
+        const product = products.get(item.productId);
+        if (!product) {
+          throw new DomainException(
+            `No se encontró el producto ${item.productId} al crear la transacción`,
+          );
+        }
+        return TransactionItem.create({
+          productId: item.productId,
+          quantity: item.quantity,
+          unitPrice: product.price,
+        });
+      });
+
+      const transaction = Transaction.create({
+        customer,
+        items: transactionItems,
+        idempotencyKey: command.idempotencyKey,
+      });
+
+      const savedTransaction = await repos.transactions.save(transaction);
+
+      const reservedUpdates = await Promise.all(
+        command.items.map(async (item) => {
+          const product = await repos.products.findByIdWithStockLock(
+            item.productId,
+          );
+          if (!product) {
+            throw new DomainException(
+              `No se encontró el producto ${item.productId} durante la reserva de stock`,
+            );
+          }
+          const oldStock = product.stock;
+          const updatedProduct = product.decreaseStock(item.quantity);
+          return {
+            productId: item.productId,
+            oldStock,
+            newStock: updatedProduct.stock,
+          };
+        }),
+      );
+
+      await repos.products.updateStockInTransaction(reservedUpdates);
+
+      return { transaction: savedTransaction, reservedUpdates };
+    });
+  }
+
+  private async restoreReservedStock(
+    items: readonly TransactionItem[],
+    correlationId: string,
+  ): Promise<void> {
+    return this.unitOfWork.runInTransaction(async (repos) => {
+      const updates = await Promise.all(
+        items.map(async (item) => {
+          const product = await repos.products.findByIdWithStockLock(
+            item.productId,
+          );
+          if (!product) {
+            throw new DomainException(
+              `No se encontró el producto ${item.productId} durante la restauración de stock`,
+            );
+          }
+          const oldStock = product.stock;
+          const updatedProduct = product.increaseStock(item.quantity);
+          return {
+            productId: item.productId,
+            oldStock,
+            newStock: updatedProduct.stock,
+          };
+        }),
+      );
+
+      await repos.products.restoreStockInTransaction(updates);
+
+      for (const update of updates) {
+        await this.auditPort.logStockUpdated(
+          update.productId,
+          correlationId,
+          update.oldStock,
+          update.newStock,
         );
       }
-      return TransactionItem.create({
-        productId: item.productId,
-        quantity: item.quantity,
-        unitPrice: product.price,
-      });
     });
-
-    const transaction = Transaction.create({
-      customer,
-      items: transactionItems,
-      idempotencyKey: command.idempotencyKey,
-    });
-
-    return this.transactionRepository.save(transaction);
   }
 
   private async markTransactionAsError(

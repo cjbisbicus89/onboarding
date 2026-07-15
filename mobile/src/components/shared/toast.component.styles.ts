@@ -1,4 +1,4 @@
-import { COLORS, SPACING } from '../../infrastructure/theme';
+import { Theme } from '../../infrastructure/theme';
 
 const TOAST_Z_INDEX = 1000;
 
@@ -8,18 +8,18 @@ export const makeToastStyles = () => ({
     bottom: 0,
     left: 0,
     right: 0,
-    padding: SPACING.base,
+    padding: Theme.spacing.base,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: TOAST_Z_INDEX,
   },
   text: {
-    color: COLORS.white,
-    fontWeight: '600',
+    color: Theme.colors.neutral['100'],
+    fontWeight: Theme.typography.weights.semibold,
     textAlign: 'center',
   },
-  info: { backgroundColor: COLORS.info },
-  success: { backgroundColor: COLORS.success },
-  warning: { backgroundColor: COLORS.warning },
-  error: { backgroundColor: COLORS.error },
+  info: { backgroundColor: Theme.colors.info },
+  success: { backgroundColor: Theme.colors.success },
+  warning: { backgroundColor: Theme.colors.warning },
+  error: { backgroundColor: Theme.colors.error },
 } as const);

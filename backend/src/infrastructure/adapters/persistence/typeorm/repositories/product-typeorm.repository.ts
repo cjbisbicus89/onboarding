@@ -70,6 +70,37 @@ export class ProductTypeormRepository implements ProductRepositoryPort {
     }
   }
 
+  async restoreStockInTransaction(
+    updates: Array<{ productId: string; newStock: number }>,
+  ): Promise<void> {
+    const manager = this.getManager();
+
+    for (const update of updates) {
+      // Pessimistic lock + atomic read of current stock within the transaction.
+      // newStock must be >= currentStock because we are restoring units.
+      const result = await manager.query(
+        'SELECT stock FROM products WHERE id = $1 FOR UPDATE',
+        [update.productId],
+      );
+
+      const currentStock = result[0]?.stock;
+      if (currentStock === undefined) {
+        throw new DomainException(
+          `No se encontró el producto ${update.productId}`,
+        );
+      }
+
+      if (update.newStock < 0 || update.newStock < currentStock) {
+        throw new InsufficientStockException(update.productId);
+      }
+
+      await manager.query('UPDATE products SET stock = $1 WHERE id = $2', [
+        update.newStock,
+        update.productId,
+      ]);
+    }
+  }
+
   private getManager(): EntityManager {
     return this.manager ?? this.dataSource.manager;
   }

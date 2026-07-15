@@ -1,19 +1,19 @@
-import { COLORS, SHADOWS, AnimationConfig } from '../../infrastructure/theme';
+import { Theme } from '../../infrastructure/theme';
 
 export const makeBackdropStyles = (height: number) => ({
   overlay: {
-    backgroundColor: COLORS.black,
+    backgroundColor: Theme.colors.neutral['900'],
   },
   backdrop: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    maxHeight: height * AnimationConfig.BackdropHeightRatio,
-    backgroundColor: COLORS.background,
-    borderTopLeftRadius: AnimationConfig.BackdropBorderRadius,
-    borderTopRightRadius: AnimationConfig.BackdropBorderRadius,
-    ...SHADOWS.elevated,
+    maxHeight: height * Theme.animation.BackdropHeightRatio,
+    backgroundColor: Theme.colors.background,
+    borderTopLeftRadius: Theme.animation.BackdropBorderRadius,
+    borderTopRightRadius: Theme.animation.BackdropBorderRadius,
+    ...Theme.shadows.elevated,
   },
   container: {
     flex: 1,

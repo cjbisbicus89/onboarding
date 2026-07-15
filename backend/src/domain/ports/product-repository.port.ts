@@ -8,4 +8,7 @@ export interface ProductRepositoryPort {
   updateStockInTransaction(
     updates: Array<{ productId: string; newStock: number }>,
   ): Promise<void>;
+  restoreStockInTransaction(
+    updates: Array<{ productId: string; newStock: number }>,
+  ): Promise<void>;
 }

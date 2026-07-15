@@ -67,6 +67,9 @@ export const makeCardFormStyles = ({ width, height }: { width: number; height: n
   disabledButton: {
     backgroundColor: COLORS.primaryLight,
   },
+  pressedButton: {
+    opacity: 0.85,
+  },
   buttonText: {
     color: COLORS.white,
     fontSize: FONT_SIZES.lg,

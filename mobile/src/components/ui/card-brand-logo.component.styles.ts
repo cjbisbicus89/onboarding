@@ -1,35 +1,35 @@
-import { COLORS, FONT_SIZES, SPACING } from '../../infrastructure/theme';
+import { Theme } from '../../infrastructure/theme';
 
 const BRAND_LOGO_LETTER_SPACING = 0.5;
 
 export const makeCardBrandLogoStyles = () => ({
   badge: {
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs / 2,
-    borderRadius: SPACING.xs,
-    marginLeft: SPACING.sm,
+    paddingHorizontal: Theme.spacing.sm,
+    paddingVertical: Theme.spacing.xs / 2,
+    borderRadius: Theme.spacing.xs,
+    marginLeft: Theme.spacing.sm,
   },
   visaBadge: {
-    backgroundColor: COLORS.visaBackground,
+    backgroundColor: Theme.colors.visaBackground,
   },
   mastercardBadge: {
-    backgroundColor: COLORS.mastercardBackground,
+    backgroundColor: Theme.colors.mastercardBackground,
   },
   otherBadge: {
-    backgroundColor: COLORS.brandGray,
+    backgroundColor: Theme.colors.brandGray,
   },
   text: {
-    fontSize: FONT_SIZES.xs,
-    fontWeight: 'bold',
+    fontSize: Theme.typography.xs,
+    fontWeight: Theme.typography.weights.bold,
     letterSpacing: BRAND_LOGO_LETTER_SPACING,
   },
   visaText: {
-    color: COLORS.white,
+    color: Theme.colors.neutral['100'],
   },
   mastercardText: {
-    color: COLORS.white,
+    color: Theme.colors.neutral['100'],
   },
   otherText: {
-    color: COLORS.white,
+    color: Theme.colors.neutral['100'],
   },
 } as const);

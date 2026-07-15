@@ -5,7 +5,8 @@ import { Shadows } from '../../theme/shadows';
 import { Sizes } from '../../theme/sizes';
 import { Spacing } from '../../theme/spacing';
 import { Typography } from '../../theme/typography';
-import { useResponsiveDimensions } from '../../theme/responsive';
+import { useResponsiveDimensions, responsiveWidth, responsiveHeight } from '../../theme/responsive';
+import { Theme } from '../../theme';
 
 export const COLORS = Colors;
 export const SPACING = Spacing;
@@ -24,4 +25,4 @@ export const FONT_SIZES = {
   title: 28,
   titleLarge: 32,
 };
-export { AnimationConfig, useResponsiveDimensions };
+export { AnimationConfig, useResponsiveDimensions, responsiveWidth, responsiveHeight, Theme };

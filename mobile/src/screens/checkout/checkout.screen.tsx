@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   View,
   Text,
   FlatList,
-  TouchableOpacity,
+  Pressable,
   StyleSheet,
   SafeAreaView,
 } from 'react-native';
@@ -20,10 +20,8 @@ import { PaymentSummaryComponent } from './components/payment-summary.component'
 import { setCustomerData } from '../../application/state/slices/customerSlice';
 import { v4 as uuidv4 } from 'uuid';
 import { Toast, useToast } from '../../components/shared/toast.component';
-import { COLORS, SIZES } from '../../infrastructure/theme';
-import { checkoutStyles } from './checkout.styles';
-
-const styles = StyleSheet.create(checkoutStyles);
+import { COLORS, useResponsiveDimensions } from '../../infrastructure/theme';
+import { makeCheckoutStyles } from './checkout.styles';
 
 type CheckoutScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Checkout'>;
 
@@ -53,6 +51,15 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
   const dispatch = useAppDispatch();
   const cart = useAppSelector((state) => state.cart);
   const customer = useAppSelector((state) => state.customer);
+  const { width, height } = useResponsiveDimensions();
+  const styles = useMemo(
+    () => StyleSheet.create(makeCheckoutStyles({ width, height })),
+    [width, height],
+  );
+
+  const iconSmall = width * 0.04;
+  const iconBase = width * 0.05;
+  const iconLarge = width * 0.06;
 
   const [showCardBackdrop, setShowCardBackdrop] = useState(false);
   const [showCustomerBackdrop, setShowCustomerBackdrop] = useState(false);
@@ -134,13 +141,14 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
           status: 'APPROVED',
         });
       } else {
-        const errorMsg =
+        const statusMsg =
           result.status === 'DECLINED'
             ? 'Transacción rechazada por el banco emisor'
             : result.status === 'PENDING'
             ? 'El pago está siendo procesado, verificaremos su estado al reiniciar la app'
             : 'Error técnico al procesar el pago';
-        showToast(errorMsg, 'error');
+        const toastType = result.status === 'PENDING' ? 'warning' : 'error';
+        showToast(statusMsg, toastType);
         setTimeout(() => {
           setShowSummaryBackdrop(false);
           navigation.navigate('Result', {
@@ -176,25 +184,25 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
         </Text>
       </View>
       <View style={styles.quantityControls}>
-        <TouchableOpacity
+        <Pressable
           onPress={() => handleUpdateQuantity(item.productId, item.quantity - 1)}
-          style={styles.qtyButton}
+          style={({ pressed }) => [styles.qtyButton, pressed && styles.pressedButton]}
         >
-          <Minus size={SIZES.iconSmall} color={COLORS.primary} />
-        </TouchableOpacity>
+          <Minus size={iconSmall} color={COLORS.primary} />
+        </Pressable>
         <Text style={styles.quantity}>{item.quantity}</Text>
-        <TouchableOpacity
+        <Pressable
           onPress={() => handleUpdateQuantity(item.productId, item.quantity + 1)}
-          style={styles.qtyButton}
+          style={({ pressed }) => [styles.qtyButton, pressed && styles.pressedButton]}
         >
-          <Plus size={SIZES.iconSmall} color={COLORS.primary} />
-        </TouchableOpacity>
-        <TouchableOpacity
+          <Plus size={iconSmall} color={COLORS.primary} />
+        </Pressable>
+        <Pressable
           onPress={() => dispatch(removeItem(item.productId))}
-          style={styles.removeButton}
+          style={({ pressed }) => [styles.removeButton, pressed && styles.pressedButton]}
         >
-          <Trash2 size={SIZES.iconBase} color={COLORS.textSecondary} />
-        </TouchableOpacity>
+          <Trash2 size={iconBase} color={COLORS.textSecondary} />
+        </Pressable>
       </View>
     </View>
   );
@@ -202,9 +210,9 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <ArrowLeft size={SIZES.iconLarge} color={COLORS.textPrimary} />
-        </TouchableOpacity>
+        <Pressable onPress={() => navigation.goBack()} style={({ pressed }) => [pressed && styles.pressedButton]}>
+          <ArrowLeft size={iconLarge} color={COLORS.textPrimary} />
+        </Pressable>
         <Text style={styles.headerTitle}>Mi Carrito</Text>
         <View style={styles.headerRightSpacer} />
       </View>
@@ -230,10 +238,10 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
               ${(cart.totalAmountCentavos / 100).toLocaleString()} COP
             </Text>
           </View>
-          <TouchableOpacity style={styles.payButton} onPress={handleStartPayment}>
-            <CreditCard color={COLORS.white} size={SIZES.iconLarge} />
+          <Pressable style={({ pressed }) => [styles.payButton, pressed && styles.pressedButton]} onPress={handleStartPayment}>
+            <CreditCard color={COLORS.white} size={iconLarge} />
             <Text style={styles.payButtonText}>Pagar con tarjeta de crédito</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       )}
 

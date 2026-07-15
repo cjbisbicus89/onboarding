@@ -3,7 +3,7 @@ import {
   View,
   Text,
   TextInput,
-  TouchableOpacity,
+  Pressable,
   StyleSheet,
   ActivityIndicator,
 } from 'react-native';
@@ -160,8 +160,12 @@ export const CardFormComponent: React.FC<Props> = ({ onComplete, loading }) => {
       </View>
       {errors.holderName && <Text style={styles.errorText}>{errors.holderName}</Text>}
 
-      <TouchableOpacity
-        style={[styles.button, loading && styles.disabledButton]}
+      <Pressable
+        style={({ pressed }) => [
+          styles.button,
+          loading && styles.disabledButton,
+          pressed && !loading && styles.pressedButton,
+        ]}
         onPress={handleSubmit}
         disabled={loading}
       >
@@ -170,7 +174,7 @@ export const CardFormComponent: React.FC<Props> = ({ onComplete, loading }) => {
         ) : (
           <Text style={styles.buttonText}>Continuar</Text>
         )}
-      </TouchableOpacity>
+      </Pressable>
     </View>
   );
 };
