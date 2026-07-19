@@ -3,7 +3,6 @@ import {
   IsInt,
   IsOptional,
   IsString,
-  IsUrl,
   Min,
   validateSync,
 } from 'class-validator';
@@ -18,7 +17,7 @@ class EnvironmentVariables {
   @IsString()
   DATABASE_URL: string;
 
-  @IsUrl()
+  @IsString()
   PAYMENT_PROVIDER_BASE_URL: string;
 
   @IsString()
