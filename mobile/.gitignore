@@ -32,12 +32,20 @@ yarn-error.*
 .env
 .env*.local
 
+# Android build and local files
+android/app/build
+android/build
+android/local.properties
+android/.gradle
+.gradle
+
 # typescript
 *.tsbuildinfo
 
 # generated native folders
-/ios
-/android
+# (Only ignore if using Expo, but this is a CLI project)
+# /ios
+# /android
 
 # cuarentena de auditoría
 /_cleanup_backup/
