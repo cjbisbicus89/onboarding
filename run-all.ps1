@@ -38,6 +38,27 @@ foreach ($port in $requiredPorts) {
     Stop-ProcessUsingPort -Port $port
 }
 
+# 0. Verificar dependencias (requerido para el primer arranque tras clonar)
+function Check-NodeModules {
+    param ([string]$Path)
+    if (-not (Test-Path "$Path/node_modules")) {
+        Write-Host "Instalando dependencias en $Path (solo la primera vez)..." -ForegroundColor Yellow
+        # Ejecutamos npm install directamente para que el usuario vea el progreso y posibles errores
+        Push-Location $Path
+        npm install
+        $exitCode = $LASTEXITCODE
+        Pop-Location
+        if ($exitCode -ne 0) {
+            Write-Host "Error al instalar dependencias en $Path. Por favor, revisa los errores de npm arriba." -ForegroundColor Red
+            exit 1
+        }
+    }
+}
+
+Check-NodeModules -Path '.'
+Check-NodeModules -Path 'backend'
+Check-NodeModules -Path 'mobile'
+
 # 0. Limpieza previa
 Write-Host 'Limpiando contenedores previos...'
 docker-compose down
