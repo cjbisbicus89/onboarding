@@ -29,16 +29,10 @@ npm run dev:all
 
 ### Requisitos antes de ejecutarlo
 
-1. **Crea un archivo `.env`** en la raíz del proyecto copiando el contenido de `.env.example`. Esto configura las llaves de la pasarela en ambiente Sandbox:
-
-   ```bash
-   cp .env.example .env
-   ```
-
-2. **Docker Desktop** debe estar abierto y corriendo.
-3. Abre el emulador de Android Studio o conecta un celular físico *antes* de ejecutar el comando (ver secciones más abajo).
-- El backend y la base de datos PostgreSQL corren dentro de contenedores Docker.
-- El script intenta liberar los puertos `3000`, `5432`, `8081` y `8082` si estaban ocupados. Si no puede cerrarlos, avisará para que los liberes manualmente.
+1. **Docker Desktop** debe estar abierto y corriendo.
+2. Abre el emulador de Android Studio o conecta un celular físico *antes* de ejecutar el comando (ver secciones más abajo).
+3. El backend y la base de datos PostgreSQL corren dentro de contenedores Docker. Las llaves de la pasarela están pre-configuradas en ambiente Sandbox.
+4. El script intenta liberar los puertos `3000`, `5432`, `8081` y `8082` si estaban ocupados. Si no puede cerrarlos, avisará para que los liberes manualmente.
 
 ### Qué hace `npm run dev:all`
 
