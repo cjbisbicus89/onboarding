@@ -15,5 +15,6 @@ export interface PaymentGatewayPort {
     success: boolean;
     providerReference: string;
     status: TransactionStatus;
+    errorReason?: string;
   }>;
 }

@@ -136,7 +136,7 @@ describe('CheckoutScreen', () => {
     await act(async () => { fireEvent.press(getByText('ConfirmPayment')); await Promise.resolve(); jest.advanceTimersByTime(2000); });
 
     expect(mockShowToast).toHaveBeenCalledWith('Error al procesar pago', 'error');
-    expect(mockNavigation.navigate).toHaveBeenCalledWith('Result', { transactionId: 'mock-uuid', status: 'ERROR' });
+    expect(mockNavigation.navigate).toHaveBeenCalledWith('Result', { transactionId: 'mock-uuid', status: 'ERROR', message: 'Error al procesar pago' });
   });
 
   it('renders and dismisses toast when a toast is present', () => {
@@ -230,7 +230,7 @@ describe('CheckoutScreen', () => {
     await act(async () => { fireEvent.press(getByText('CardFormSubmit')); await Promise.resolve(); jest.advanceTimersByTime(300); });
     await act(async () => { fireEvent.press(getByText('ConfirmPayment')); await Promise.resolve(); jest.advanceTimersByTime(2000); });
 
-    expect(mockNavigation.navigate).toHaveBeenCalledWith('Result', { transactionId: 'tx', status: 'DECLINED' });
+    expect(mockNavigation.navigate).toHaveBeenCalledWith('Result', { transactionId: 'tx', status: 'DECLINED', message: 'Transacción rechazada por el banco emisor' });
   });
 
   it('handles pending payment and navigates after delay', async () => {
@@ -241,7 +241,7 @@ describe('CheckoutScreen', () => {
     await act(async () => { fireEvent.press(getByText('CardFormSubmit')); await Promise.resolve(); jest.advanceTimersByTime(300); });
     await act(async () => { fireEvent.press(getByText('ConfirmPayment')); await Promise.resolve(); jest.advanceTimersByTime(2000); });
 
-    expect(mockNavigation.navigate).toHaveBeenCalledWith('Result', { transactionId: 'tx', status: 'PENDING' });
+    expect(mockNavigation.navigate).toHaveBeenCalledWith('Result', { transactionId: 'tx', status: 'PENDING', message: 'El pago está siendo procesado, verificaremos su estado al reiniciar la app' });
   });
 
   it('handles payment error and navigates after delay', async () => {
@@ -253,6 +253,6 @@ describe('CheckoutScreen', () => {
     await act(async () => { fireEvent.press(getByText('CardFormSubmit')); await Promise.resolve(); jest.advanceTimersByTime(300); });
     await act(async () => { fireEvent.press(getByText('ConfirmPayment')); await Promise.resolve(); jest.advanceTimersByTime(2000); });
 
-    expect(mockNavigation.navigate).toHaveBeenCalledWith('Result', { transactionId: 'err-tx', status: 'ERROR' });
+    expect(mockNavigation.navigate).toHaveBeenCalledWith('Result', { transactionId: 'err-tx', status: 'ERROR', message: 'Bank error' });
   });
 });

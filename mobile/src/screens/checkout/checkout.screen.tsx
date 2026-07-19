@@ -139,14 +139,16 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
         navigation.navigate('Result', {
           transactionId: result.transactionId,
           status: 'APPROVED',
+          message: result.message,
         });
       } else {
         const statusMsg =
-          result.status === 'DECLINED'
+          result.message ||
+          (result.status === 'DECLINED'
             ? 'Transacción rechazada por el banco emisor'
             : result.status === 'PENDING'
             ? 'El pago está siendo procesado, verificaremos su estado al reiniciar la app'
-            : 'Error técnico al procesar el pago';
+            : 'Error técnico al procesar el pago');
         const toastType = result.status === 'PENDING' ? 'warning' : 'error';
         showToast(statusMsg, toastType);
         setTimeout(() => {
@@ -154,6 +156,7 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
           navigation.navigate('Result', {
             transactionId: result.transactionId,
             status: result.status,
+            message: statusMsg,
           });
         }, ERROR_NAVIGATION_DELAY_MS);
       }
@@ -168,6 +171,7 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
         navigation.navigate('Result', {
           transactionId: finalTransactionId,
           status: 'ERROR',
+          message: msg,
         });
       }, ERROR_NAVIGATION_DELAY_MS);
     } finally {

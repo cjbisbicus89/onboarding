@@ -5,9 +5,9 @@ const DEFAULT_NON_ANDROID_URL = 'http://localhost:3000/api/v1';
 
 export const CONFIG = {
   get API_BASE_URL() {
-    return (
+    const value =
       process.env.API_BASE_URL ||
-      (Platform.OS === 'android' ? DEFAULT_ANDROID_URL : DEFAULT_NON_ANDROID_URL)
-    );
+      (Platform.OS === 'android' ? DEFAULT_ANDROID_URL : DEFAULT_NON_ANDROID_URL);
+    return value;
   },
 };

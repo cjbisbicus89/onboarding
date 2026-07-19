@@ -81,7 +81,7 @@ const getResultConfig = (status: ResultStatus): ResultConfig => {
 };
 
 const ResultScreen: React.FC<Props> = ({ route }) => {
-  const { transactionId, status } = route.params;
+  const { transactionId, status, message } = route.params;
   const dispatch = useAppDispatch();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const config = getResultConfig(status);
@@ -115,7 +115,7 @@ const ResultScreen: React.FC<Props> = ({ route }) => {
       <View style={styles.content}>
         {config.icon}
         <Text style={styles.title}>{config.title}</Text>
-        <Text style={styles.subtitle}>{config.subtitle}</Text>
+        <Text style={styles.subtitle}>{message || config.subtitle}</Text>
         <Text style={styles.transactionId}>ID: {transactionId}</Text>
 
         <TouchableOpacity

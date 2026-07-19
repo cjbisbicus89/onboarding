@@ -137,21 +137,22 @@ describe('PaymentProviderAdapter', () => {
     expect(result.status).toBe('DECLINED');
   });
 
-  it('processPayment_whenHttpFails_propagatesError', async () => {
+  it('processPayment_whenProviderReturnsValidationError_returnsDeclinedResult', async () => {
     const error = new AxiosError('Bad request');
     error.response = { status: 400 } as never;
 
     httpService.post.mockReturnValue(throwError(() => error));
 
-    await expect(
-      adapter.processPayment(createTransaction(), {
-        cardNumber: '4111111111111111',
-        cvc: '123',
-        expMonth: '12',
-        expYear: '2027',
-        holderName: 'John Doe',
-      }),
-    ).rejects.toThrow('Bad request');
+    const result = await adapter.processPayment(createTransaction(), {
+      cardNumber: '4111111111111111',
+      cvc: '123',
+      expMonth: '12',
+      expYear: '2027',
+      holderName: 'John Doe',
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.status).toBe('DECLINED');
   });
 
   it('processPayment_whenProviderReturnsPending_pollsAndReturnsApproved', async () => {

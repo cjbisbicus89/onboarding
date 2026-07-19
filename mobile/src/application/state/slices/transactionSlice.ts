@@ -55,7 +55,7 @@ const initialState: TransactionState = {
 };
 
 export const processCheckout = createAsyncThunk<
-  { transactionId: string; status: Exclude<TransactionState['status'], 'IDLE'> },
+  { transactionId: string; status: Exclude<TransactionState['status'], 'IDLE'>; message?: string },
   ProcessCheckoutPayload
 >('transaction/processCheckout', async (payload, { dispatch, rejectWithValue }) => {
   const { localTransactionId, items, customer, paymentMethod } = payload;
@@ -73,6 +73,7 @@ export const processCheckout = createAsyncThunk<
 
     const finalTransactionId = response.transactionId;
     const finalStatus = response.status;
+    const finalMessage = response.errorReason;
 
     dispatch(checkoutSuccess({ transactionId: finalTransactionId, status: finalStatus }));
 
@@ -80,7 +81,7 @@ export const processCheckout = createAsyncThunk<
       dispatch(clearCart());
     }
 
-    return { transactionId: finalTransactionId, status: finalStatus };
+    return { transactionId: finalTransactionId, status: finalStatus, message: finalMessage };
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Error al procesar pago';
     dispatch(checkoutFailure(message));

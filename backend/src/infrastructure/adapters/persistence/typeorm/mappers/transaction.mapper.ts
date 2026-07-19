@@ -18,6 +18,7 @@ export class TransactionMapper {
       currency: totalAmount.currency,
       assignedTo: transaction.customer.email,
       timestamp: transaction.createdAt.toISOString(),
+      errorReason: transaction.errorReason || undefined,
     };
   }
 

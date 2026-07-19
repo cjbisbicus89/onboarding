@@ -22,6 +22,7 @@ export interface CheckoutResponse {
   currency: string;
   assignedTo: string;
   timestamp: string;
+  errorReason?: string;
 }
 
 export interface TransactionResponse {
@@ -54,6 +55,8 @@ export class CheckoutClientService {
     idempotencyKey: string,
     correlationId: string,
   ): Promise<CheckoutResponse> {
+    console.warn(`[DEBUG] CHECKOUT STARTING. URL: ${this.client.defaults?.baseURL ?? 'no-base-url'}`);
+    console.log('[checkout-client] checkout START', CONFIG.API_BASE_URL, idempotencyKey, correlationId);
     try {
       const response = await this.client.post<CheckoutResponse>(
         '/checkout',
@@ -65,9 +68,13 @@ export class CheckoutClientService {
           },
         },
       );
+      console.log('[checkout-client] checkout SUCCESS', response.status, response.data);
       return response.data;
     } catch (error) {
+      console.log('[checkout-client] checkout ERROR', error);
       throw this.normalizeError(error);
+    } finally {
+      console.log('[checkout-client] checkout FINALLY');
     }
   }
 

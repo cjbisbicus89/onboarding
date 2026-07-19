@@ -46,6 +46,10 @@ export class ProcessCheckoutUseCase {
     }
 
     const products = await this.validateProductsAndStock(command.items);
+    
+    const sanitizedLog = command.card.number.replace(/\s/g, '').replace(/-/g, '');
+    console.log(`[DEBUG] Received card in UseCase: ${sanitizedLog.slice(0, 4)}...${sanitizedLog.slice(-4)}`);
+
     CardValidator.assertValid({
       number: command.card.number,
       expMonth: command.card.expMonth,
@@ -96,6 +100,7 @@ export class ProcessCheckoutUseCase {
       success: boolean;
       providerReference: string;
       status: TransactionStatus;
+      errorReason?: string;
     };
     try {
       paymentResult = await this.paymentGateway.processPayment(transaction, {
@@ -153,9 +158,9 @@ export class ProcessCheckoutUseCase {
         if (paymentResult.status === TransactionStatus.APPROVED) {
           latest.approve(paymentResult.providerReference);
         } else if (paymentResult.status === TransactionStatus.DECLINED) {
-          latest.decline('Payment declined by provider');
+          latest.decline(paymentResult.errorReason || 'Payment declined by provider');
         } else if (paymentResult.status === TransactionStatus.ERROR) {
-          latest.markAsError('Payment provider returned unexpected status');
+          latest.markAsError(paymentResult.errorReason || 'Payment provider returned unexpected status');
         }
         // Si el proveedor devuelve PENDING, la transacción mantiene su estado
         // inicial y el frontend hará polling vía GET /transactions/:id.

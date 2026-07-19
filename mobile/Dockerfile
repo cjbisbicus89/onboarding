@@ -9,7 +9,7 @@ RUN npm ci
 COPY shared /app/shared
 COPY mobile .
 
-RUN sed -i '/^react {/a\    bundleInDebug = true' android/app/build.gradle
+RUN sed -i '/^react {/a\    debuggableVariants = []' android/app/build.gradle
 
 RUN cd android && chmod +x ./gradlew && ./gradlew assembleDebug
 

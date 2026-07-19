@@ -40,4 +40,11 @@ export class CheckoutResponseDto implements CheckoutResponse {
     example: '2026-07-11T21:14:47.336Z',
   })
   readonly timestamp: string;
+
+  @ApiProperty({
+    description: 'Razón del rechazo si el pago fue declinado',
+    example: 'Fondos insuficientes',
+    required: false,
+  })
+  readonly errorReason?: string;
 }

@@ -7,4 +7,5 @@ export interface CheckoutResponse {
   currency: string;
   assignedTo: string;
   timestamp: string;
+  errorReason?: string;
 }

@@ -21,51 +21,48 @@ Aplicación móvil de checkout con pagos con tarjeta de crédito, construida con
 
 ## Cómo levantar todo el proyecto
 
-1. Instala las dependencias de los proyectos:
-
-```bash
-npm install
-cd backend && npm install
-cd ../mobile && npm install
-```
-
-2. Ejecuta el comando único que levanta la base de datos, el backend, abre Swagger e intenta instalar la app en un dispositivo Android:
+Con un solo comando se levanta la base de datos, el backend, se abre Swagger, se configuran los puentes ADB y se intenta instalar/arrancar la app en un dispositivo Android:
 
 ```bash
 npm run dev:all
 ```
 
-Este comando hace lo siguiente:
+### Requisitos antes de ejecutarlo
 
-1. **Libera los puertos 3000, 5432, 8081 y 8082** si estaban ocupados por procesos locales anteriores.
+- **Docker Desktop** debe estar abierto y corriendo.
+- Abre el emulador de Android Studio o conecta un celular físico *antes* de ejecutar el comando (ver secciones más abajo).
+- El backend y la base de datos PostgreSQL corren dentro de contenedores Docker.
+- El script intenta liberar los puertos `3000`, `5432`, `8081` y `8082` si estaban ocupados. Si no puede cerrarlos, avisará para que los liberes manualmente.
+
+### Qué hace `npm run dev:all`
+
+1. Libera puertos si es necesario.
 2. Levanta PostgreSQL, el backend y pgweb en Docker.
 3. Espera a que el backend responda correctamente (`/health`).
 4. Abre Swagger y pgweb en el navegador.
-5. Si detecta un celular o emulador Android, configura los puentes ADB e instala/arranca la app.
-6. Si **no detecta** ningún dispositivo, **construye la APK automaticamente** con `mobile_builder` y espera unos segundos por si conectas un dispositivo para instalarla.
-
-### Requisitos previos para el comando único
-
-- **Docker Desktop debe estar abierto y corriendo** en tu equipo antes de ejecutar `npm run dev:all`.
-- El backend y la base de datos PostgreSQL se ejecutan dentro de contenedores Docker.
-- El script intenta cerrar automáticamente procesos que ocupen los puertos `3000`, `5432`, `8081` y `8082` para evitar conflictos. Si no puede cerrarlos, se mostrará un aviso y podrás liberarlos manualmente.
+5. Detecta si hay un emulador o celular Android conectado por ADB:
+   - Si hay uno, configura `adb reverse` e instala/arranca la app.
+   - Si no hay ninguno, construye el APK automáticamente en `mobile/build/app-mobile.apk`.
 
 ### Tiempo estimado
 
-Aproximadamente **20 segundos** para que el backend y la DB estén listos. La instalación en Android puede tomar unos minutos adicionales.
+- Backend y base de datos: ~20 segundos.
+- Instalación en Android/emulador: 1 a 5 minutos adicionales.
 
 ## Cómo usar el emulador
 
+El emulador debe estar encendido *antes* de ejecutar `npm run dev:all`:
+
 1. Abre Android Studio.
 2. Ve a **Device Manager** y arranca tu emulador (por ejemplo, `Pixel_6_API_34`).
-3. Espera que el emulador esté completamente encendido.
-4. Ejecuta:
+3. Espera a que termine de cargar por completo.
+4. Ejecuta desde la raíz del proyecto:
 
 ```bash
 npm run dev:all
 ```
 
-La app se instalará y abrirá automáticamente en el emulador.
+El script detectará el emulador por ADB, configurará los puentes de red (`adb reverse`) e instalará/arrancará la app automáticamente.
 
 ## Cómo usar un celular físico
 
@@ -96,6 +93,14 @@ mobile/build/app-mobile.apk
 ```
 
 ## Cómo ejecutar pruebas
+
+> **Nota:** Si es la primera vez que vas a correr pruebas, instala las dependencias locales de cada subproyecto:
+>
+> ```bash
+> cd backend && npm install
+> cd ../mobile && npm install
+> cd ..
+> ```
 
 ### Backend
 
@@ -180,6 +185,12 @@ Usa estas tarjetas en el ambiente Sandbox:
 - El proyecto usa **ambiente Sandbox** para pagos. No se procesa dinero real.
 - La app mobile está configurada para conectarse al backend usando la IP local de la máquina.
 - Asegúrate de que tu celular o emulador estén en la **misma red Wi-Fi** que tu PC si usas la APK o una IP local.
+
+## Video de la aplicación
+
+En el siguiente enlace puedes ver un video de cómo funciona la aplicación:
+
+[Video del proyecto - Google Drive](https://drive.google.com/drive/folders/1L-Lm6uGODshEv7GTfISujFbY0asrCIjo)
 
 ## Licencia
 
