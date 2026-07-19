@@ -19,6 +19,12 @@ Aplicación móvil de checkout con pagos con tarjeta de crédito, construida con
 - [JDK 17 de Temurin (Adoptium)](https://adoptium.net/es/temurin/releases/?version=17) (requerido por Android y Gradle)
 - [Android SDK command line tools](https://developer.android.com/studio#command-tools) (alternativa si no instalas Android Studio completo)
 
+## Video de instalación y ejecución
+
+En el siguiente enlace puedes ver un video de cómo instalar, configurar y ejecutar la aplicación:
+
+[Video del proyecto - Google Drive](https://drive.google.com/drive/folders/1L-Lm6uGODshEv7GTfISujFbY0asrCIjo)
+
 ## Cómo levantar todo el proyecto
 
 Con un solo comando se levanta la base de datos, el backend, se abre Swagger, se configuran los puentes ADB y se intenta instalar/arrancar la app en un dispositivo Android:
@@ -185,12 +191,6 @@ Usa estas tarjetas en el ambiente Sandbox:
 - El proyecto usa **ambiente Sandbox** para pagos. No se procesa dinero real.
 - La app mobile está configurada para conectarse al backend usando la IP local de la máquina.
 - Asegúrate de que tu celular o emulador estén en la **misma red Wi-Fi** que tu PC si usas la APK o una IP local.
-
-## Video de la aplicación
-
-En el siguiente enlace puedes ver un video de cómo funciona la aplicación:
-
-[Video del proyecto - Google Drive](https://drive.google.com/drive/folders/1L-Lm6uGODshEv7GTfISujFbY0asrCIjo)
 
 ## Licencia
 
